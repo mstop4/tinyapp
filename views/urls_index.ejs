@@ -12,7 +12,7 @@
   <main>
     <ul>
       <% for (key in urls) { %>
-      <li><a href="<%= key %>"><%= key %></a> <strong>----></strong> <a href="<%= urls[key] %>"><%= urls[key] %></a></li>
+      <li><a href="./urls/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a> ----> <a href="<%= urls[key] %>"><%= urls[key] %></a></li>
       <% }; %>
     </ul>
   </main>

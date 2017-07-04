@@ -28,6 +28,11 @@ app.get("/", (req, res) => {
   res.end("<h1>Welcome to TinyApp!</h1>");
 });
 
+app.get("/u/:shortURL", (req, res) => {
+  let longURL = urlDatabase[req.params.shortURL];
+  res.redirect(longURL);
+});
+
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
