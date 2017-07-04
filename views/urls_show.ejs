@@ -5,9 +5,15 @@
 </head>
 <body>
 
-  <ul>
-    <p><%= shortURL %> --> <%= urls[shortURL] %></p>
-  </ul>
+  <header>
+    <% include ./partials/_header %>
+  </header>
+
+  <main>
+    <ul>
+      <p><%= shortURL %> --> <%= urls[shortURL] %></p>
+    </ul>
+  </main>
 
 </body>
 </html>

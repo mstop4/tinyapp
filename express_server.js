@@ -11,7 +11,7 @@ var urlDatabase = {
 }
 
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  res.end("<h1>Welcome to TinyApp!</h1>");
 });
 
 app.get("/urls", (req, res) => {

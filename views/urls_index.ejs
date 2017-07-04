@@ -5,13 +5,17 @@
 </head>
 <body>
 
-<h1>URL List</h1>
+  <header>
+    <% include ./partials/_header %>
+  </header>
 
-  <ul>
-    <% for (key in urls) { %>
-    <li><%= key %> - <%= urls[key] %></li>
-    <% }; %>
-  </ul>
+  <main>
+    <ul>
+      <% for (key in urls) { %>
+      <li><%= key %> - <%= urls[key] %></li>
+      <% }; %>
+    </ul>
+  </main>
 
 </body>
 </html>
