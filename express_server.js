@@ -29,8 +29,16 @@ app.get("/", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
-  res.redirect(longURL);
+
+  if (!(req.params.shortURL in urlDatabase)) {
+    console.log("404'd!");
+    res.render("error-404");
+  }
+
+  else {
+    let longURL = urlDatabase[req.params.shortURL];
+    res.redirect(longURL);
+  }
 });
 
 app.get("/urls", (req, res) => {
