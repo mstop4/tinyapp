@@ -1,6 +1,9 @@
 require("dotenv").config();
 var express = require("express");
+const bodyParser = require("body-parser");
 var app = express();
+app.use(bodyParser.urlencoded({extended: true}));
+
 var PORT = process.env.MY_PORT || 8080;
 
 app.set("view engine", "ejs");
@@ -8,6 +11,17 @@ app.set("view engine", "ejs");
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+}
+
+function generateRandomString(length) {
+  const legalCharacters = "0123456789ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  let output = "";
+
+  for (var i = 0; i < length; i++) {
+    output += legalCharacters[Math.floor(Math.random() * legalCharacters.length)]
+  }
+
+  return output;
 }
 
 app.get("/", (req, res) => {
@@ -19,8 +33,13 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/new", (req, res) => {
-  res.render("urls_new", {});
+app.post("/urls", (req, res) => {
+  console.log(req.body);
+  res.send("Ok " + generateRandomString(5));
+});
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
 });
 
 app.get("/urls/:id", (req, res) => {
