@@ -25,7 +25,7 @@ function generateRandomString(length) {
 }
 
 app.get("/", (req, res) => {
-  res.end("<h1>Welcome to TinyApp!</h1>");
+  res.render("index");
 });
 
 app.get("/u/:shortURL", (req, res) => {
@@ -39,7 +39,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  let shortCode = generateRandomString(5);
+  let shortCode = generateRandomString(6);
   urlDatabase[shortCode] = req.body.longURL;
   console.log(req.body.longURL, " --> ", shortCode);
   res.redirect("/urls/" + shortCode);
