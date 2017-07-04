@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>TinyApp</title>
+  <% include ./partials/_head %>
 </head>
 <body>
 
@@ -12,7 +12,7 @@
   <main>
     <ul>
       <% for (key in urls) { %>
-      <li><%= key %> - <%= urls[key] %></li>
+      <li><a href="<%= key %>"><%= key %></a> <strong>----></strong> <a href="<%= urls[key] %>"><%= urls[key] %></a></li>
       <% }; %>
     </ul>
   </main>
