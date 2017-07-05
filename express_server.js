@@ -50,12 +50,18 @@ function getUsername(cookies) {
   }
 }
 
+// Home Page
+// ---------
+
 // GET root - home page
 app.get("/", (req, res) => {
   console.log(req.cookies);
   let templateVars = { username: getUsername(req.cookies) };
   res.status(200).render("index", templateVars);
 });
+
+// Logins
+// ------
 
 // POST /login - log into the service
 app.post("/login", (req, res) => {
@@ -66,12 +72,25 @@ app.post("/login", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
+// GET /login - this shouldn't happen
+app.get("/login", (req, res) => {
+  res.status(403).send("Forbidden");
+});
+
 // POST /logout - log out of the service
 app.post("/logout", (req, res) => {
 
   res.clearCookie(COOKIE_NAME);
   res.status(302).redirect("/urls");
 });
+
+// GET /logout - this shouldn't happen
+app.get("/logout", (req, res) => {
+  res.status(403).send("Forbidden");
+});
+
+// Shortlink redirection
+// ---------------------
 
 // GET /u/:id - redirect to full URL
 app.get("/u/:shortURL", (req, res) => {
