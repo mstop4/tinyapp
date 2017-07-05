@@ -22,6 +22,32 @@ var urlDatabase = {
   "teapot": "http://www.google.com/teapot"
 }
 
+var users = {
+  "kingroland": {
+    id: "kingroland",
+    email: "kingroland@druidia.net",
+    password: "12345"
+  },
+
+  "presidentskroob": {
+    id: "presidentskroob",
+    email: "skroob@spaceballone.com",
+    password: "12345"
+  },
+
+  "BLU_Soldier": {
+    id: "BLU_Soldier",
+    email: "BLU_Soldier@blu.blu",
+    password: "1111"
+  },
+
+  "bender": {
+    id: "bender",
+    email: "bender@ilovebender.com",
+    password: "antiquing"
+  }
+}
+
 // Generates a random string of a certain length using alphanumeric characters
 function generateRandomString(length) {
   const legalCharacters = "0123456789ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -89,6 +115,19 @@ app.post("/logout", (req, res) => {
 app.get("/logout", (req, res) => {
   res.status(403).send("Forbidden");
 });
+
+// POST /register - creates a new account
+app.post("/register", (req, res) => {
+
+
+});
+
+// GET /register - opens registration page
+app.get("/register", (req, res) => {
+
+  let templateVars = { username: getUsername(req.cookies) }
+  res.status(200).render("user_reg", templateVars);
+})
 
 // Shortlink redirection
 // ---------------------
