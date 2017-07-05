@@ -4,6 +4,8 @@ body {
     background-color: black;
     color: white;
     font-family: "Comic Sans MS";
+
+    cursor: url(cursor.gif), auto;
 }
 
 h1 {
