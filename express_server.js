@@ -61,8 +61,8 @@ app.get("/", (req, res) => {
   res.status(200).render("index", templateVars);
 });
 
-// Logins
-// ------
+// User Authentication
+// -------------------
 
 // POST /login - log into the service
 app.post("/login", (req, res) => {
@@ -110,6 +110,9 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+// Database query
+// --------------
+
 // GET /urls - shows a list of all URLs
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, username: getUsername(req.cookies) };
@@ -118,10 +121,21 @@ app.get("/urls", (req, res) => {
 
 // POST /urls - submit a new URL
 app.post("/urls", (req, res) => {
+
+  // append "http://" to longURL if it doesn't already have it
+  // to prevent 404 errors
+
+  let longURL = req.body.longURL;
+
+  if (longURL.indexOf("http://") === -1) {
+    longURL = "http://" + longURL;
+  }
+
   let shortCode = generateRandomString(6);
-  urlDatabase[shortCode] = req.body.longURL;
-  console.log(req.body.longURL, " --> ", shortCode);
+  urlDatabase[shortCode] = longURL;
+  console.log(longURL, " --> ", shortCode);
   res.status(302).redirect("/urls/" + shortCode);
+
 });
 
 // GET /urls/new - shows URL submission form
@@ -152,8 +166,7 @@ app.get("/urls/:id", (req, res) => {
 
 // GET /urls.json - shows URL database in JSON format
 app.get("/urls.json", (req, res) => {
-  let templateVars = { username: getUsername(req.cookies) };
-  res.status(200).json(urlDatabase, templateVars);
+  res.status(200).json(urlDatabase);
 });
 
 // GET /teapot - easter egg

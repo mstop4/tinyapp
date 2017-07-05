@@ -3,6 +3,31 @@
 body {
     background-color: #304060;
     color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+li.navbar {
+  display: inline;
+  float: left;
+}
+
+h1 {
+  font-family: 'Indie Flower', cursive;
+  font-size: 64px;
+}
+
+h2 {
+  font-size: 36px;
+}
+
+h3 {
+  font-size: 24px;
+}
+
+a.navbar {
+  display: block;
+  padding: 8px;
+  background-color: #406080;
 }
 
 a:link {
