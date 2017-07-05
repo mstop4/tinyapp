@@ -7,6 +7,7 @@ const cookieParser = require("cookie-parser");
 
 // Init app
 var app = express();
+app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -96,12 +97,10 @@ app.get("/logout", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
 
   var urlKeys = Object.keys(urlDatabase);
-  console.log(req.params.shortURL);
-  console.log(urlKeys);
 
   if (urlKeys.indexOf(req.params.shortURL) === -1) {
     console.log("404'd!");
-    let templateVars = { username: getUsername(req.cookie) };
+    let templateVars = { username: getUsername(req.cookies) };
     res.status(404).render("error_404", templateVars);
   }
 

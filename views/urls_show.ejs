@@ -11,7 +11,7 @@
 
   <main>
     <ul>
-      <h2>Success!</h2>
+      <h2>Shortlink</h2>
       <p><a href="../u/<%= shortURL %>">http://localhost:8080/u/<strong><%= shortURL %></strong></a> now links to <strong><a href="<%= longURL %>"><%= longURL %></a></strong></p>
       <form method="POST" action="/urls/<%= shortURL %>/update">
         <label for="longURL">Enter a new URL:</label>
@@ -19,6 +19,8 @@
         <input type="submit" value="Update">
       </form>
     </ul>
+
+    <img src="../doge.jpg"/>
   </main>
 
   <footer>
