@@ -33,17 +33,18 @@ function generateRandomString(length) {
   return output;
 }
 
-//
+// Fetches the username from the cookie, or returns "Guest" if it doesn't exist
 function getUsername(cookies) {
 
-  console.log(cookies[COOKIE_NAME]);
-
-  if (!cookies) {
+  // No cookies found
+  if (Object.keys(cookies).length === 0) {
     return "Guest";
 
+  // Cookie found AND username found
   } else if (Object.keys(cookies[COOKIE_NAME]).indexOf("username") !== -1) {
     return cookies[COOKIE_NAME]["username"];
 
+  // Cookie found BUT username not found
   } else {
     return "Guest";
   }
@@ -60,8 +61,15 @@ app.get("/", (req, res) => {
 app.post("/login", (req, res) => {
 
   let user = req.body.username;
-  res.cookie(`${COOKIE_NAME}`, { username: user });
+  res.cookie(COOKIE_NAME, { username: user });
   console.log("Logged in as:", user);
+  res.status(302).redirect("/urls");
+});
+
+// POST /logout - log out of the service
+app.post("/logout", (req, res) => {
+
+  res.clearCookie(COOKIE_NAME);
   res.status(302).redirect("/urls");
 });
 
