@@ -4,3 +4,16 @@ body {
     background-color: #304060;
     color: white;
 }
+
+a:link {
+  color: #C0E0FF;
+}
+
+a:visited {
+  color: #C0E0FF;
+}
+
+a:hover {
+  color: #80C0FF;
+  font-weight: 900;
+}
