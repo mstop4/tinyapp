@@ -12,7 +12,12 @@
   <main>
     <ul>
       <h2>Success!</h2>
-      <p><strong><a href="../u/<%= shortURL %>">http://localhost:8080/u/<%= shortURL %></a></strong> now links to <strong><a href="<%= urls[shortURL] %>"><%= urls[shortURL] %></a></strong></p>
+      <p><a href="../u/<%= shortURL %>">http://localhost:8080/u/<strong><%= shortURL %></strong></a> now links to <strong><a href="<%= urls[shortURL] %>"><%= urls[shortURL] %></a></strong></p>
+      <form method="POST" action="/urls/<%= shortURL %>/update">
+        <label for="longURL">Enter a new URL:</label>
+        <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
+        <input type="submit" value="Update">
+      </form>
     </ul>
   </main>
 

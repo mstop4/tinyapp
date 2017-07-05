@@ -1,12 +1,12 @@
 require("dotenv").config();
 var express = require("express");
 const bodyParser = require("body-parser");
+
 var app = express();
 app.use(bodyParser.urlencoded({extended: true}));
+app.set("view engine", "ejs");
 
 var PORT = process.env.MY_PORT || 8080;
-
-app.set("view engine", "ejs");
 
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -30,8 +30,13 @@ app.get("/", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
 
-  if (!(req.params.shortURL in urlDatabase)) {
+  var urlKeys = Object.keys(urlDatabase);
+  console.log(req.params.shortURL);
+  console.log(urlKeys);
+
+  if (urlKeys.indexOf(req.params.shortURL) === -1) {
     console.log("404'd!");
+    res.status(404);
     res.render("error-404");
   }
 
@@ -57,10 +62,23 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  console.log("Delete", req.params.id);
+  delete urlDatabase[req.params.id];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:id/update", (req, res) => {
+  console.log("Update", req.params.id);
+  urlDatabase[req.params.id] = req.body.longURL;
+  res.redirect("/urls");
+});
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = { urls: urlDatabase, shortURL: req.params.id };
   res.render("urls_show", templateVars);
 })
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);

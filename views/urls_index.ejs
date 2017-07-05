@@ -10,9 +10,14 @@
   </header>
 
   <main>
+    <!-- List all URLs with a delete button -->
     <ul>
       <% for (key in urls) { %>
-      <li><a href="./urls/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a> ----> <a href="<%= urls[key] %>"><%= urls[key] %></a></li>
+      <li>
+        localhost:8080/u/<strong><%= key %></strong> ----> <a href="<%= urls[key] %>"><%= urls[key] %></a>
+        <a href="./urls/<%= key %>">Edit</a>
+        <form method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
+      </li>
       <% }; %>
     </ul>
   </main>
