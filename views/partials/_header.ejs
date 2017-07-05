@@ -7,6 +7,15 @@
     <li><a href="/urls/new">Create Shortlink</a></li>
     <li><a href="/urls">View Database (List)</a></li>
     <li><a href="/urls.json">View Database (JSON)</a></li>
+
+    <br/>
+
+    <p>Welcome, <%= username %>!</p>
+      <form action="/login" method="POST">
+        <label for="username">Login </label>
+        <input id="username" name="username" type="text">
+        <input type="submit" value="Sign In">
+      </form>
   </ul>
 </nav>
 <hr/>
