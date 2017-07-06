@@ -25,41 +25,10 @@ var PORT = process.env.MY_PORT || 8080;
 //const COOKIE_NAME = "localuser@tinyapp";
 
 var urlDatabase = {};
-
-var users = {
-  "aaaaaa": {
-    id: "aaaaaa",
-    email: "kingroland@druidia.net",
-    password: bcrypt.hashSync("12345", 10)
-  },
-
-  "bbbbbb": {
-    id: "bbbbbb",
-    email: "presidentskroob@spaceballone.com",
-    password: bcrypt.hashSync("12345", 10)
-  },
-
-  "cccccc": {
-    id: "cccccc",
-    email: "BLU_Soldier@blu.blu",
-    password: bcrypt.hashSync("1111", 10)
-  },
-
-  "dddddd": {
-    id: "dddddd",
-    email: "bender@ilovebender.com",
-    password: bcrypt.hashSync("antiquing", 10)
-  },
-
-  "eeeeee": {
-    id: "eeeeee",
-    email: "normal@guy.org",
-    password: bcrypt.hashSync("boring", 10)
-  }
-}
+var users = {};
 
 function addUser(userId, userEmail, userPassword) {
-  users["userId"] = { id: userID, email: userEmail, passHash: bcrypt.hashSync(userPassword, 10) };
+  users["userId"] = { id: userId, email: userEmail, passHash: bcrypt.hashSync(userPassword, 10) };
 }
 
 function addURL(shortCode, longURL, userId) {
@@ -288,9 +257,14 @@ app.get("/teapot", (req, res) => {
     res.status(418).render("im_a_teapot", templateVars);
 });
 
-// Start server
 
-// populate
+// Populate databases with users and URLs
+addUser("aaaaaa", "kingroland@druidia.net", "12345");
+addUser("bbbbbb", "presidentskroob@spaceballone.com", "12345");
+addUser("cccccc", "BLU_Soldier@blu.blu", "1111");
+addUser("dddddd", "bender@ilovebender.com", "antiquing");
+addUser("eeeeee", "normal@guy.org", "boring");
+
 addURL("b2xVn2", "http://www.lighthouselabs.ca", "eeeeee");
 addURL("9sm5xK", "http://www.google.com", "eeeeee");
 addURL("teapot", "http://www.google.com/teapot", "eeeeee");
@@ -299,6 +273,7 @@ addURL("9sm5xK", "http://www.benderisgreat.com", "dddddd");
 
 console.log(urlDatabase);
 
+// Start server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
