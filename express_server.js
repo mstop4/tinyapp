@@ -28,7 +28,7 @@ var users = {};
 // Functions
 
 function addUser(userId, userEmail, userPassword) {
-  users["userId"] = { id: userId,
+  users[userId] = { id: userId,
                       email: userEmail,
                       passHash: bcrypt.hashSync(userPassword, 10),
                     };
@@ -98,7 +98,9 @@ app.post("/login", (req, res) => {
   let user = undefined;
 
   // find user in database
+  console.log(users);
   for (i in users) {
+    console.log(users[i]);
     console.log(email + " <--> " + users[i]["email"]);
     if (users[i]["email"] === email) {
       user = users[i];
@@ -285,7 +287,7 @@ addURL("teapot", "http://www.google.com/teapot", "eeeeee");
 addURL("lugage", "http://www.luggage.com", "bbbbbb");
 addURL("9sm5xK", "http://www.benderisgreat.com", "dddddd");
 
-console.log(urlDatabase);
+console.log(users);
 
 // Start server
 app.listen(PORT, () => {
