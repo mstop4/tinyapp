@@ -4,6 +4,7 @@ require("dotenv").config();
 var express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const bcrypt = require("bcrypt");
 
 // Init app
 var app = express();
@@ -47,31 +48,31 @@ var users = {
   "aaaaaa": {
     id: "aaaaaa",
     email: "kingroland@druidia.net",
-    password: "12345"
+    password: bcrypt.hashSync("12345", 10)
   },
 
   "bbbbbb": {
     id: "bbbbbb",
     email: "presidentskroob@spaceballone.com",
-    password: "12345"
+    password: bcrypt.hashSync("12345", 10)
   },
 
   "cccccc": {
     id: "cccccc",
     email: "BLU_Soldier@blu.blu",
-    password: "1111"
+    password: bcrypt.hashSync("1111", 10)
   },
 
   "dddddd": {
     id: "dddddd",
     email: "bender@ilovebender.com",
-    password: "antiquing"
+    password: bcrypt.hashSync("antiquing", 10)
   },
 
   "eeeeee": {
     id: "eeeeee",
     email: "normal@guy.org",
-    password: "boring"
+    password: bcrypt.hashSync("boring", 10)
   }
 }
 
@@ -160,8 +161,9 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Invalid email or password.");
   }
 
-  // check user password
-  if (user["password"] === password) {
+  // check user password hash
+
+  if (bcrypt.compareSync(password, user["password"])) {
     res.cookie(COOKIE_NAME, user);
     console.log("Logged in as:" + user["id"] + " - " + user["email"]);
     return res.status(302).redirect("/");
@@ -208,10 +210,9 @@ app.post("/register", (req, res) => {
 
   // ok
   let randomID = generateRandomString(6);
-  users[randomID] = { "id": randomID, email: req.body.email, password: req.body.password};
+  let hashPass = bcrypt.hashSync(req.body.password, 10);
+  users[randomID] = { "id": randomID, email: req.body.email, password: hashPass};
   res.cookie(COOKIE_NAME, users[randomID] );
-
-  console.log(req.body.email, req.body.password);
 
   console.log("Logged in as:" + randomID + " - " + req.body.email);
   res.status(302).redirect("/urls");
@@ -256,7 +257,6 @@ app.get("/urls", (req, res) => {
   }
 
   let templateVars = { urls: filterURLsByUser(req.cookies[COOKIE_NAME]), user: req.cookies[COOKIE_NAME] };
-  console.log(templateVars["urls"]);
   res.status(200).render("urls_index", templateVars);
 });
 
@@ -317,6 +317,8 @@ app.get("/teapot", (req, res) => {
 });
 
 // Start server
+console.log(users);
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
