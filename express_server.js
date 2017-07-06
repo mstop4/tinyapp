@@ -17,9 +17,25 @@ var PORT = process.env.MY_PORT || 8080;
 const COOKIE_NAME = "localuser@tinyapp";
 
 var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
-  "teapot": "http://www.google.com/teapot"
+  "b2xVn2": {
+    url: "http://www.lighthouselabs.ca",
+    user_id: "eeeeee"
+  },
+
+  "9sm5xK": {
+    url: "http://www.google.com",
+    user_id: "eeeeee"
+  },
+
+  "teapot": {
+    url: "http://www.google.com/teapot",
+    user_id: "dddddd"
+  },
+
+  "4dH5Dv": {
+    url: "http://www.luggage.com",
+    user_id: "bbbbbb"
+  }
 }
 
 var users = {
@@ -45,6 +61,12 @@ var users = {
     id: "dddddd",
     email: "bender@ilovebender.com",
     password: "antiquing"
+  },
+
+  "eeeeee": {
+    id: "eeeeee",
+    email: "normal@guy.org",
+    password: "boring"
   }
 }
 
@@ -76,6 +98,16 @@ function getUser(cookies) {
   // Cookie found BUT username not found
   } else {
     return undefined;
+  }
+}
+
+// Append "http://" to URL if it doesn't already have it to prevent 404 errors
+function protocolFixer (url) {
+
+  if (url.indexOf("http://") === -1) {
+    return "http://" + url;
+  } else {
+    return url;
   }
 }
 
@@ -113,7 +145,7 @@ app.post("/login", (req, res) => {
 
   // check user password
   if (user["password"] === password) {
-    res.cookie(COOKIE_NAME, { user_id: user["id"] });
+    res.cookie(COOKIE_NAME, { "user_id": user["id"] });
     console.log("Logged in as:" + user["id"] + " - " + user["email"]);
     return res.status(302).redirect("/");
 
@@ -130,9 +162,8 @@ app.get("/login", (req, res) => {
 
 // POST /logout - log out of the service
 app.post("/logout", (req, res) => {
-
   res.clearCookie(COOKIE_NAME);
-  res.status(302).redirect("/urls");
+  res.status(302).redirect("/");
 });
 
 // GET /logout - this shouldn't happen
@@ -154,14 +185,14 @@ app.post("/register", (req, res) => {
   // disallow duplicate emails
   for (user in users) {
     if (users[user]["email"] === email) {
-      return res.status(400).send("That email is already registered!");
+       return res.status(400).send("That email is already registered!");
     }
   }
 
   // ok
   let randomID = generateRandomString(6);
-  users[randomID] = { id: randomID, email: req.body.email, password: req.body.password};
-  res.cookie(COOKIE_NAME, { user_id: randomID });
+  users[randomID] = { "id": randomID, email: req.body.email, password: req.body.password};
+  res.cookie(COOKIE_NAME, { "user_id": randomID });
 
   console.log(req.body.email, req.body.password);
 
@@ -191,7 +222,7 @@ app.get("/u/:shortURL", (req, res) => {
   }
 
   else {
-    let longURL = urlDatabase[req.params.shortURL];
+    let longURL = urlDatabase[req.params.shortURL]["url"];
     res.status(302).redirect(longURL);
   }
 });
@@ -199,26 +230,20 @@ app.get("/u/:shortURL", (req, res) => {
 // Database query
 // --------------
 
-// GET /urls - shows a list of all URLs
+// GET /urls - shows a list of all URLs associated with user
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase, user: getUser(req.cookies) };
+  console.log(templateVars["urls"]);
   res.status(200).render("urls_index", templateVars);
 });
 
 // POST /urls - submit a new URL
 app.post("/urls", (req, res) => {
 
-  // append "http://" to longURL if it doesn't already have it
-  // to prevent 404 errors
-
-  let longURL = req.body.longURL;
-
-  if (longURL.indexOf("http://") === -1) {
-    longURL = "http://" + longURL;
-  }
-
+  let longURL = protocolFixer(req.body.longURL);
   let shortCode = generateRandomString(6);
-  urlDatabase[shortCode] = longURL;
+
+  urlDatabase[shortCode] = { url: longURL, user_id: req.cookies["user_id"]};
   console.log(longURL, " --> ", shortCode);
   res.status(302).redirect("/urls/" + shortCode);
 
@@ -226,6 +251,12 @@ app.post("/urls", (req, res) => {
 
 // GET /urls/new - shows URL submission form
 app.get("/urls/new", (req, res) => {
+
+  // check to see if user is logged in, if not go to login page
+  if (Object.keys(req.cookies).length === 0) {
+    return res.status(302).redirect("/login");
+  }
+
   let templateVars = { user: getUser(req.cookies) };
   res.status(200).render("urls_new", templateVars);
 });
@@ -240,13 +271,13 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST /urls/:id/update - updates a URL
 app.post("/urls/:id/update", (req, res) => {
   console.log("Update", req.params.id);
-  urlDatabase[req.params.id] = req.body.longURL;
+  urlDatabase[req.params.id] = protocolFixer(req.body.longURL);
   res.status(302).redirect("/urls");
 });
 
 // GET /urls/:id - shows the URL and its shortlink
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { longURL: urlDatabase[req.params.id], shortURL: req.params.id, user: getUser(req.cookies) };
+  let templateVars = { longURL: urlDatabase[req.params.id]["url"], shortURL: req.params.id, user: getUser(req.cookies) };
   res.status(200).render("urls_show", templateVars);
 })
 

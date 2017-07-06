@@ -12,7 +12,9 @@
   <main>
     <ul>
       <h2>Shortlink</h2>
-      <p><a href="../u/<%= shortURL %>">http://localhost:8080/u/<strong><%= shortURL %></strong></a> now links to <strong><a href="<%= longURL %>"><%= longURL %></a></strong></p>
+      <p><a href="../u/<%= shortURL %>">http://localhost:8080/u/<strong><%= shortURL %></strong></a> -----> <strong><a href="<%= longURL %>"><%= longURL %></a></strong></p>
+
+      <h3>Update this shortlink</h3>
       <form method="POST" action="/urls/<%= shortURL %>/update">
         <label for="longURL">Enter a new URL:</label>
         <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
