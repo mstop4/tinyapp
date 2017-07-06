@@ -172,9 +172,7 @@ app.get("/register", (req, res) => {
 // GET /u/:id - redirect to full URL
 app.get("/u/:shortURL", (req, res) => {
 
-  var urlKeys = Object.keys(urlDatabase);
-
-  if (urlKeys.indexOf(req.params.shortURL) === -1) {
+  if (!urlDatabase.hasOwnProperty(req.params.shortURL)) {
     console.log("404'd!");
     let templateVars = { user: req.session.user };
     res.status(404).render("error_404", templateVars);
@@ -241,8 +239,14 @@ app.post("/urls/:id/update", (req, res) => {
 
 // GET /urls/:id - shows the URL and its shortlink
 app.get("/urls/:id", (req, res) => {
+
+  if (!urlDatabase.hasOwnProperty(req.params.id)) {
+    let templateVars = { user: req.session.user };
+    return res.status(404).render("error_404", templateVars);
+  }
+
   let templateVars = { longURL: urlDatabase[req.params.id]["url"], shortURL: req.params.id, user: req.session.user };
-  res.status(200).render("urls_show", templateVars);
+  res.status(200).render("/urls_show", templateVars);
 })
 
 // GET /urls.json - shows URL database in JSON format
@@ -254,7 +258,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/teapot", (req, res) => {
     let templateVars = { user: req.session.user };
     console.log("Teapot easter egg");
-    res.status(418).render("im_a_teapot", templateVars);
+    res.status(418).render("/im_a_teapot", templateVars);
 });
 
 
