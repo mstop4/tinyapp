@@ -29,12 +29,17 @@ var urlDatabase = {
 
   "teapot": {
     url: "http://www.google.com/teapot",
-    user_id: "dddddd"
+    user_id: "eeeeee"
   },
 
-  "4dH5Dv": {
+  "lugage": {
     url: "http://www.luggage.com",
     user_id: "bbbbbb"
+  },
+
+  "bender": {
+    url: "http://www.benderisgreat.com",
+    user_id: "dddddd"
   }
 }
 
@@ -83,22 +88,34 @@ function generateRandomString(length) {
 }
 
 // Fetches the user from the cookie, or returns undefined if it doesn't exist
-function getUser(cookies) {
+// function getUser(cookies) {
 
-  // No cookies found
-  if (Object.keys(cookies).length === 0) {
-    return undefined;
+//   // No cookies found
+//   if (Object.keys(cookies).length === 0) {
+//     return undefined;
 
-  // Cookie found AND username found
-  } else if (Object.keys(cookies[COOKIE_NAME]).indexOf("user_id") !== -1) {
+//   // Cookie found AND used ID found
+//   } else if (Object.keys(cookies[COOKIE_NAME]).indexOf("id") !== -1) {
 
-    let userID = cookies[COOKIE_NAME]["user_id"];
-    return users[userID];
+//     let userID = cookies[COOKIE_NAME]["id"];
+//     return users[userID];
 
-  // Cookie found BUT username not found
-  } else {
-    return undefined;
+//   // Cookie found BUT user ID not found
+//   } else {
+//     return undefined;
+//   }
+// }
+
+// Returns a list of URLs filtered by user
+function filterURLsByUser (user) {
+  let filteredList = {};
+
+  for (shortURL in urlDatabase) {
+    if (urlDatabase[shortURL]["user_id"] === user["id"]) {
+      filteredList[shortURL] = urlDatabase[shortURL];
+    }
   }
+  return filteredList;
 }
 
 // Append "http://" to URL if it doesn't already have it to prevent 404 errors
@@ -117,7 +134,7 @@ function protocolFixer (url) {
 // GET root - home page
 app.get("/", (req, res) => {
 
-  let templateVars = { user: getUser(req.cookies) };
+  let templateVars = { user: req.cookies[COOKIE_NAME] };
   res.status(200).render("index", templateVars);
 });
 
@@ -145,7 +162,7 @@ app.post("/login", (req, res) => {
 
   // check user password
   if (user["password"] === password) {
-    res.cookie(COOKIE_NAME, { "user_id": user["id"] });
+    res.cookie(COOKIE_NAME, user);
     console.log("Logged in as:" + user["id"] + " - " + user["email"]);
     return res.status(302).redirect("/");
 
@@ -156,7 +173,7 @@ app.post("/login", (req, res) => {
 
 // GET /login - go to login page
 app.get("/login", (req, res) => {
-  let templateVars = { user: getUser(req.cookies) };
+  let templateVars = { user: req.cookies[COOKIE_NAME] };
   res.status(200).render("user_login", templateVars);
 });
 
@@ -192,7 +209,7 @@ app.post("/register", (req, res) => {
   // ok
   let randomID = generateRandomString(6);
   users[randomID] = { "id": randomID, email: req.body.email, password: req.body.password};
-  res.cookie(COOKIE_NAME, { "user_id": randomID });
+  res.cookie(COOKIE_NAME, users[randomID] );
 
   console.log(req.body.email, req.body.password);
 
@@ -203,7 +220,7 @@ app.post("/register", (req, res) => {
 // GET /register - opens registration page
 app.get("/register", (req, res) => {
 
-  let templateVars = { user: getUser(req.cookies) }
+  let templateVars = { user: req.cookies[COOKIE_NAME] }
   res.status(200).render("user_reg", templateVars);
 })
 
@@ -217,7 +234,7 @@ app.get("/u/:shortURL", (req, res) => {
 
   if (urlKeys.indexOf(req.params.shortURL) === -1) {
     console.log("404'd!");
-    let templateVars = { user: getUser(req.cookies) };
+    let templateVars = { user: req.cookies[COOKIE_NAME] };
     res.status(404).render("error_404", templateVars);
   }
 
@@ -232,7 +249,13 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET /urls - shows a list of all URLs associated with user
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, user: getUser(req.cookies) };
+
+  // check to see if user is logged in, if not go to login page
+  if (Object.keys(req.cookies).length === 0) {
+    return res.status(302).redirect("/login");
+  }
+
+  let templateVars = { urls: filterURLsByUser(req.cookies[COOKIE_NAME]), user: req.cookies[COOKIE_NAME] };
   console.log(templateVars["urls"]);
   res.status(200).render("urls_index", templateVars);
 });
@@ -243,7 +266,7 @@ app.post("/urls", (req, res) => {
   let longURL = protocolFixer(req.body.longURL);
   let shortCode = generateRandomString(6);
 
-  urlDatabase[shortCode] = { url: longURL, user_id: req.cookies["user_id"]};
+  urlDatabase[shortCode] = { url: longURL, user_id: req.cookies[COOKIE_NAME]["id"]};
   console.log(longURL, " --> ", shortCode);
   res.status(302).redirect("/urls/" + shortCode);
 
@@ -257,7 +280,7 @@ app.get("/urls/new", (req, res) => {
     return res.status(302).redirect("/login");
   }
 
-  let templateVars = { user: getUser(req.cookies) };
+  let templateVars = { user: req.cookies[COOKIE_NAME] };
   res.status(200).render("urls_new", templateVars);
 });
 
@@ -277,7 +300,7 @@ app.post("/urls/:id/update", (req, res) => {
 
 // GET /urls/:id - shows the URL and its shortlink
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { longURL: urlDatabase[req.params.id]["url"], shortURL: req.params.id, user: getUser(req.cookies) };
+  let templateVars = { longURL: urlDatabase[req.params.id]["url"], shortURL: req.params.id, user: req.cookies[COOKIE_NAME] };
   res.status(200).render("urls_show", templateVars);
 })
 
@@ -288,7 +311,7 @@ app.get("/urls.json", (req, res) => {
 
 // GET /teapot - easter egg
 app.get("/teapot", (req, res) => {
-    let templateVars = { user: getUser(req.cookies) };
+    let templateVars = { user: req.cookies[COOKIE_NAME] };
     console.log("Teapot easter egg");
     res.status(418).render("im_a_teapot", templateVars);
 });

@@ -12,16 +12,13 @@
   <main>
     <!-- List all URLs with a delete button -->
     <ul>
-      <% for (key in urls) {
-           if (user && urls[key]["user_id"] === user["id"]) { %>
-            <li>
-              localhost:8080/u/<strong><%= key %></strong> ----> <a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a>
-
-                <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
-                <form class="urlItem" method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
-            </li>
-        <% };
-         }; %>
+      <% for (key in urls) { %>
+        <li>
+          localhost:8080/u/<strong><%= key %></strong> ----> <a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a>
+          <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
+          <form class="urlItem" method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
+        </li>
+      <% }; %>
     </ul>
   </main>
 
