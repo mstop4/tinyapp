@@ -22,18 +22,25 @@ app.set("view engine", "ejs");
 
 // Data
 var PORT = process.env.MY_PORT || 8080;
-//const COOKIE_NAME = "localuser@tinyapp";
-
 var urlDatabase = {};
 var users = {};
 
+// Functions
+
 function addUser(userId, userEmail, userPassword) {
-  users["userId"] = { id: userId, email: userEmail, passHash: bcrypt.hashSync(userPassword, 10) };
+  users["userId"] = { id: userId,
+                      email: userEmail,
+                      passHash: bcrypt.hashSync(userPassword, 10),
+                    };
 }
 
 function addURL(shortCode, longURL, userId) {
   let rightNow = new Date(Date.now());
-  urlDatabase[shortCode] = { url: longURL, user_id: userId, dateCreated: rightNow};
+  urlDatabase[shortCode] = { url: longURL,
+                             user_id: userId,
+                             dateCreated: rightNow,
+                             hits: 0
+                           };
 }
 
 // Generates a random string of a certain length using alphanumeric characters
@@ -92,6 +99,7 @@ app.post("/login", (req, res) => {
 
   // find user in database
   for (i in users) {
+    console.log(email + " <--> " + users[i]["email"]);
     if (users[i]["email"] === email) {
       user = users[i];
       break;
@@ -99,18 +107,17 @@ app.post("/login", (req, res) => {
   }
 
   if (!user) {
-    return res.status(403).send("Invalid email or password.");
+    return res.status(403).send("Invalid email.");
   }
 
   // check user password hash
-
-  if (bcrypt.compareSync(password, user["password"])) {
+  if (bcrypt.compareSync(password, user["passHash"])) {
     req.session.user = user;
     console.log("Logged in as:" + user["id"] + " - " + user["email"]);
     return res.status(302).redirect("/");
 
   } else {
-    return res.status(403).send("Invalid email or password.");
+    return res.status(403).send("Invalid password.");
   }
 });
 
@@ -170,17 +177,20 @@ app.get("/register", (req, res) => {
 // ---------------------
 
 // GET /u/:id - redirect to full URL
-app.get("/u/:shortURL", (req, res) => {
+app.get("/u/:shortCode", (req, res) => {
 
-  if (!urlDatabase.hasOwnProperty(req.params.shortURL)) {
+  let shortCode = req.params.shortCode;
+
+  if (!urlDatabase.hasOwnProperty(shortCode)) {
     console.log("404'd!");
     let templateVars = { user: req.session.user };
-    res.status(404).render("error_404", templateVars);
+    return res.status(404).render("error_404", templateVars);
   }
 
   else {
-    let longURL = urlDatabase[req.params.shortURL]["url"];
-    res.status(302).redirect(longURL);
+    urlDatabase[shortCode]["hits"]++;
+    let longURL = urlDatabase[req.params.shortCode]["url"];
+    return res.status(302).redirect(longURL);
   }
 });
 
@@ -246,7 +256,7 @@ app.get("/urls/:id", (req, res) => {
   }
 
   let templateVars = { longURL: urlDatabase[req.params.id]["url"], shortURL: req.params.id, user: req.session.user };
-  res.status(200).render("/urls_show", templateVars);
+  res.status(200).render("urls_show", templateVars);
 })
 
 // GET /urls.json - shows URL database in JSON format
@@ -258,7 +268,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/teapot", (req, res) => {
     let templateVars = { user: req.session.user };
     console.log("Teapot easter egg");
-    res.status(418).render("/im_a_teapot", templateVars);
+    res.status(418).render("im_a_teapot", templateVars);
 });
 
 
