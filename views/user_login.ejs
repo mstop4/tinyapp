@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <% include ./partials/_head %>
+</head>
+<body>
+
+  <header>
+    <% include ./partials/_header %>
+  </header>
+
+  <main>
+    <h2>Log into your account</h2>
+
+      <form action="/login" method="POST">
+        <label for="login">Login </label>
+        <input id="login" name="email" type="email">
+        <label for="password">Password </label>
+        <input id="password" name="password" type="password">
+        <input type="submit" value="Sign In">
+      </form>
+  </main>
+
+  <footer>
+    <% include ./partials/_footer %>
+  </footer>
+
+</body>
+</html>

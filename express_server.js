@@ -95,15 +95,37 @@ app.get("/", (req, res) => {
 // POST /login - log into the service
 app.post("/login", (req, res) => {
 
-  let user = req.body.username;
-  res.cookie(COOKIE_NAME, { username: user });
-  console.log("Logged in as:", user);
-  res.status(302).redirect("/urls");
+  let email = req.body.email;
+  let password = req.body.password;
+  let user = undefined;
+
+  // find user in database
+  for (i in users) {
+    if (users[i]["email"] === email) {
+      user = users[i];
+      break;
+    }
+  }
+
+  if (!user) {
+    return res.status(403).send("Invalid email or password.");
+  }
+
+  // check user password
+  if (user["password"] === password) {
+    res.cookie(COOKIE_NAME, { user_id: user["id"] });
+    console.log("Logged in as:" + user["id"] + " - " + user["email"]);
+    return res.status(302).redirect("/");
+
+  } else {
+    return res.status(403).send("Invalid email or password.");
+  }
 });
 
-// GET /login - this shouldn't happen
+// GET /login - go to login page
 app.get("/login", (req, res) => {
-  res.status(403).send("Forbidden");
+  let templateVars = { user: getUser(req.cookies) };
+  res.status(200).render("user_login", templateVars);
 });
 
 // POST /logout - log out of the service

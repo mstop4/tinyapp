@@ -14,7 +14,7 @@
 
     <!-- Is logged in -->
     <% if (user) { %>
-      <p>Welcome, <%= user["email"] %>!</p>
+      <p>Welcome back, <%= user["email"] %>!</p>
       <form action="/logout" method="POST">
         <input type="submit" value="Sign Out">
       </form>
@@ -22,14 +22,8 @@
     <!-- Is not logged in -->
     <% } else { %>
       <p>Welcome, Guest!</p>
-      <form action="/login" method="POST">
-        <label for="username">Login </label>
-        <input id="username" name="username" type="text">
-        <input type="submit" value="Sign In">
-      </form>
-      <p>or <a href="/register">Create a new account</a></p>
+      <p><a href="/login"> Sign In</a> or <a href="/register">Create a new account</a></p>
     <% }; %>
 
-  </ul>
 </nav>
 <hr/>
