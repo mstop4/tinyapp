@@ -10,11 +10,11 @@
   </header>
 
   <main>
-    <!-- List all URLs with a delete button -->
+    <!-- List all URLs with an edit and delete button -->
     <ul>
       <% for (key in urls) { %>
         <li>
-          <a href="localhost:8080/u/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a> ----> <a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a>
+          <a href="localhost:8080/u/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a> ----> <a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a> <%= urls[key]["dateCreated"].toString() %>
           <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
           <form class="urlItem" method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
         </li>

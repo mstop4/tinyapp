@@ -1,5 +1,9 @@
 /* style.css */
 
+.header {
+  background-color: gray;
+}
+
 body {
     background-color: #304060;
     color: white;

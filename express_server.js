@@ -24,32 +24,7 @@ app.set("view engine", "ejs");
 var PORT = process.env.MY_PORT || 8080;
 //const COOKIE_NAME = "localuser@tinyapp";
 
-var urlDatabase = {
-  "b2xVn2": {
-    url: "http://www.lighthouselabs.ca",
-    user_id: "eeeeee"
-  },
-
-  "9sm5xK": {
-    url: "http://www.google.com",
-    user_id: "eeeeee"
-  },
-
-  "teapot": {
-    url: "http://www.google.com/teapot",
-    user_id: "eeeeee"
-  },
-
-  "lugage": {
-    url: "http://www.luggage.com",
-    user_id: "bbbbbb"
-  },
-
-  "bender": {
-    url: "http://www.benderisgreat.com",
-    user_id: "dddddd"
-  }
-}
+var urlDatabase = {};
 
 var users = {
   "aaaaaa": {
@@ -83,6 +58,15 @@ var users = {
   }
 }
 
+function addUser(userId, userEmail, userPassword) {
+  users["userId"] = { id: userID, email: userEmail, passHash: bcrypt.hashSync(userPassword, 10) };
+}
+
+function addURL(shortCode, longURL, userId) {
+  let rightNow = new Date(Date.now());
+  urlDatabase[shortCode] = { url: longURL, user_id: userId, dateCreated: rightNow};
+}
+
 // Generates a random string of a certain length using alphanumeric characters
 function generateRandomString(length) {
   const legalCharacters = "0123456789ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -110,7 +94,7 @@ function filterURLsByUser (user) {
 // Append "http://" to URL if it doesn't already have it to prevent 404 errors
 function protocolFixer (url) {
 
-  if (url.indexOf("http://") === -1) {
+  if (url.indexOf("http://") !== 0) {
     return "http://" + url;
   } else {
     return url;
@@ -198,8 +182,8 @@ app.post("/register", (req, res) => {
 
   // ok
   let randomID = generateRandomString(6);
-  let hashPass = bcrypt.hashSync(req.body.password, 10);
-  users[randomID] = { "id": randomID, email: req.body.email, password: hashPass};
+  let hash = bcrypt.hashSync(req.body.password, 10);
+  addUser(randomID, req.body.email, hash);
   req.session.user = users[randomID];
 
   console.log("Logged in as:" + randomID + " - " + req.body.email);
@@ -254,7 +238,7 @@ app.post("/urls", (req, res) => {
   let longURL = protocolFixer(req.body.longURL);
   let shortCode = generateRandomString(6);
 
-  urlDatabase[shortCode] = { url: longURL, user_id: req.session.user["id"]};
+  addURL(shortCode, longURL, req.session.user["id"]);
   console.log(longURL, " --> ", shortCode);
   res.status(302).redirect("/urls/" + shortCode);
 
@@ -305,7 +289,15 @@ app.get("/teapot", (req, res) => {
 });
 
 // Start server
-console.log(users);
+
+// populate
+addURL("b2xVn2", "http://www.lighthouselabs.ca", "eeeeee");
+addURL("9sm5xK", "http://www.google.com", "eeeeee");
+addURL("teapot", "http://www.google.com/teapot", "eeeeee");
+addURL("lugage", "http://www.luggage.com", "bbbbbb");
+addURL("9sm5xK", "http://www.benderisgreat.com", "dddddd");
+
+console.log(urlDatabase);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
