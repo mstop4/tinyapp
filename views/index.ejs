@@ -11,13 +11,20 @@
 
   <main>
     <h2>Welcome to TinyApp!</h2>
-<!--     <marquee><h3>This is soooooo Web 1.0. Nobody uses these anymore.</h3></marquee> -->
 
-    <ul>
-      <li><a href="urls/new">Create a new shortlink!</a></li>
-      <li><a href="urls">View URL database as a list</a></li>
-      <li><a href="urls.json">View URL data as JSON</a></li>
-    </ul>
+    <!-- Is logged in -->
+    <% if (user) { %>
+      <ul>
+        <li><a href="urls/new">Create a new shortlink!</a></li>
+        <li><a href="urls">View your shortlinks</a></li>
+      </ul>
+
+    <!-- Is not logged in -->
+    <% } else { %>
+      <p><a href="/login">Sign in</a> to start shortening links!</p>
+      <p>Don't have an account? <a href="/register">Create a new account today!</a></p>
+
+    <% }; %>
   </main>
 
   <footer>
