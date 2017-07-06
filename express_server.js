@@ -23,26 +23,26 @@ var urlDatabase = {
 }
 
 var users = {
-  "kingroland": {
-    id: "kingroland",
+  "aaaaaa": {
+    id: "aaaaaa",
     email: "kingroland@druidia.net",
     password: "12345"
   },
 
-  "presidentskroob": {
-    id: "presidentskroob",
-    email: "skroob@spaceballone.com",
+  "bbbbbb": {
+    id: "bbbbbb",
+    email: "presidentskroob@spaceballone.com",
     password: "12345"
   },
 
-  "BLU_Soldier": {
-    id: "BLU_Soldier",
+  "cccccc": {
+    id: "cccccc",
     email: "BLU_Soldier@blu.blu",
     password: "1111"
   },
 
-  "bender": {
-    id: "bender",
+  "dddddd": {
+    id: "dddddd",
     email: "bender@ilovebender.com",
     password: "antiquing"
   }
@@ -60,20 +60,22 @@ function generateRandomString(length) {
   return output;
 }
 
-// Fetches the username from the cookie, or returns "Guest" if it doesn't exist
-function getUsername(cookies) {
+// Fetches the user from the cookie, or returns undefined if it doesn't exist
+function getUser(cookies) {
 
   // No cookies found
   if (Object.keys(cookies).length === 0) {
-    return "Guest";
+    return undefined;
 
   // Cookie found AND username found
-  } else if (Object.keys(cookies[COOKIE_NAME]).indexOf("username") !== -1) {
-    return cookies[COOKIE_NAME]["username"];
+  } else if (Object.keys(cookies[COOKIE_NAME]).indexOf("user_id") !== -1) {
+
+    let userID = cookies[COOKIE_NAME]["user_id"];
+    return users[userID];
 
   // Cookie found BUT username not found
   } else {
-    return "Guest";
+    return undefined;
   }
 }
 
@@ -82,8 +84,8 @@ function getUsername(cookies) {
 
 // GET root - home page
 app.get("/", (req, res) => {
-  console.log(req.cookies);
-  let templateVars = { username: getUsername(req.cookies) };
+
+  let templateVars = { user: getUser(req.cookies) };
   res.status(200).render("index", templateVars);
 });
 
@@ -119,13 +121,36 @@ app.get("/logout", (req, res) => {
 // POST /register - creates a new account
 app.post("/register", (req, res) => {
 
+  let email = req.body.email;
+  let password = req.body.password;
 
+  // disallow blank emails and passwords
+  if (!email || !password) {
+    return res.status(400).send("Invalid email or password!");
+  }
+
+  // disallow duplicate emails
+  for (user in users) {
+    if (users[user]["email"] === email) {
+      return res.status(400).send("That email is already registered!");
+    }
+  }
+
+  // ok
+  let randomID = generateRandomString(6);
+  users[randomID] = { id: randomID, email: req.body.email, password: req.body.password};
+  res.cookie(COOKIE_NAME, { user_id: randomID });
+
+  console.log(req.body.email, req.body.password);
+
+  console.log("Logged in as:" + randomID + " - " + req.body.email);
+  res.status(302).redirect("/urls");
 });
 
 // GET /register - opens registration page
 app.get("/register", (req, res) => {
 
-  let templateVars = { username: getUsername(req.cookies) }
+  let templateVars = { user: getUser(req.cookies) }
   res.status(200).render("user_reg", templateVars);
 })
 
@@ -139,7 +164,7 @@ app.get("/u/:shortURL", (req, res) => {
 
   if (urlKeys.indexOf(req.params.shortURL) === -1) {
     console.log("404'd!");
-    let templateVars = { username: getUsername(req.cookies) };
+    let templateVars = { user: getUser(req.cookies) };
     res.status(404).render("error_404", templateVars);
   }
 
@@ -154,7 +179,7 @@ app.get("/u/:shortURL", (req, res) => {
 
 // GET /urls - shows a list of all URLs
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase, username: getUsername(req.cookies) };
+  let templateVars = { urls: urlDatabase, user: getUser(req.cookies) };
   res.status(200).render("urls_index", templateVars);
 });
 
@@ -179,7 +204,7 @@ app.post("/urls", (req, res) => {
 
 // GET /urls/new - shows URL submission form
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: getUsername(req.cookies) };
+  let templateVars = { user: getUser(req.cookies) };
   res.status(200).render("urls_new", templateVars);
 });
 
@@ -199,7 +224,7 @@ app.post("/urls/:id/update", (req, res) => {
 
 // GET /urls/:id - shows the URL and its shortlink
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { longURL: urlDatabase[req.params.id], shortURL: req.params.id, username: getUsername(req.cookies) };
+  let templateVars = { longURL: urlDatabase[req.params.id], shortURL: req.params.id, user: getUser(req.cookies) };
   res.status(200).render("urls_show", templateVars);
 })
 
@@ -210,7 +235,7 @@ app.get("/urls.json", (req, res) => {
 
 // GET /teapot - easter egg
 app.get("/teapot", (req, res) => {
-    let templateVars = { username: getUsername(req.cookies) };
+    let templateVars = { user: getUser(req.cookies) };
     console.log("Teapot easter egg");
     res.status(418).render("im_a_teapot", templateVars);
 });

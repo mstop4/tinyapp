@@ -12,16 +12,16 @@
     <br/>
     <br/>
 
-    <p>Welcome, <%= username %>!</p>
-
-    <!-- Not logged in -->
-    <% if (username !== "Guest") { %>
+    <!-- Is logged in -->
+    <% if (user) { %>
+      <p>Welcome, <%= user["email"] %>!</p>
       <form action="/logout" method="POST">
         <input type="submit" value="Sign Out">
       </form>
 
-    <!-- Is logged in -->
+    <!-- Is not logged in -->
     <% } else { %>
+      <p>Welcome, Guest!</p>
       <form action="/login" method="POST">
         <label for="username">Login </label>
         <input id="username" name="username" type="text">
