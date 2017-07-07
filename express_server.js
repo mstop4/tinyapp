@@ -44,7 +44,7 @@ function addURL(shortCode, longURL, userId) {
 }
 
 // Checks session cookie to see if user is logged in
-function amILoggedIn() {
+function amILoggedIn(req) {
   return (Object.keys(req.session).length !== 0);
 }
 
@@ -90,11 +90,17 @@ function protocolFixer (url) {
 // Home Page
 // ---------
 
-// GET root - home page
+// GET root - redirect to login page if not logged in
+//          - redirect to user's shortlink lisst if logged in
 app.get("/", (req, res) => {
 
   let templateVars = { user: req.session.user };
-  res.status(200).render("index", templateVars);
+
+  if (!amILoggedIn(req)) {
+    return res.status(302).redirect("/login");
+  } else {
+    res.status(302).redirect("/urls");
+  }
 });
 
 // User Authentication
@@ -141,7 +147,7 @@ app.get("/login", (req, res) => {
 
 // POST /logout - log out of the service
 app.post("/logout", (req, res) => {
-  req.session.user = null;
+  req.session = null;
   res.status(302).redirect("/");
 });
 
@@ -213,7 +219,7 @@ app.get("/u/:shortCode", (req, res) => {
 app.get("/urls", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
-  if (!amILoggedIn()) {
+  if (!amILoggedIn(req)) {
     return res.status(302).redirect("/login");
   }
 
@@ -237,7 +243,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
-  if (!amILoggedIn()) {
+  if (!amILoggedIn(req)) {
     return res.status(302).redirect("/login");
   }
 
