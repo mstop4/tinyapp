@@ -43,6 +43,11 @@ function addURL(shortCode, longURL, userId) {
                            };
 }
 
+// Checks session cookie to see if user is logged in
+function amILoggedIn() {
+  return (Object.keys(req.session).length !== 0);
+}
+
 // Generates a random string of a certain length using alphanumeric characters
 function generateRandomString(length) {
   const legalCharacters = "0123456789ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -57,7 +62,12 @@ function generateRandomString(length) {
 
 // Returns a list of URLs filtered by user
 function filterURLsByUser (user) {
+
   let filteredList = {};
+
+  if (!user) {
+    return filteredList;
+  }
 
   for (shortURL in urlDatabase) {
     if (urlDatabase[shortURL]["user_id"] === user["id"]) {
@@ -203,7 +213,7 @@ app.get("/u/:shortCode", (req, res) => {
 app.get("/urls", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
-  if (Object.keys(req.session).length === 0) {
+  if (!amILoggedIn()) {
     return res.status(302).redirect("/login");
   }
 
@@ -227,7 +237,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
-  if (Object.keys(req.session).length === 0) {
+  if (!amILoggedIn()) {
     return res.status(302).redirect("/login");
   }
 
@@ -245,7 +255,7 @@ app.post("/urls/:id/delete", (req, res) => {
 // POST /urls/:id/update - updates a URL
 app.post("/urls/:id/update", (req, res) => {
   console.log("Update", req.params.id);
-  urlDatabase[req.params.id] = protocolFixer(req.body.longURL);
+  urlDatabase[req.params.id]["url"] = protocolFixer(req.body.longURL);
   res.status(302).redirect("/urls");
 });
 
