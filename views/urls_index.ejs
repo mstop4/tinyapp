@@ -31,7 +31,7 @@
             <td><%= urls[key]["hits"] %></td>
             <td>
               <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
-              <form class="urlItem" method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
+              <form class="urlItem" method="POST" action="/urls/<%= key %>?_method=DELETE"><input type="submit" value="Delete"></form>
             </td>
           </tr>
         <% }; %>

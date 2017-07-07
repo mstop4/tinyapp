@@ -4,6 +4,7 @@ var express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
+const methodOverride = require('method-override');
 
 // Init app
 var app = express();
@@ -16,6 +17,9 @@ app.use(cookieSession({
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
+// override with POST having ?_method=DELETE
+app.use(methodOverride('_method'))
 
 app.set("view engine", "ejs");
 
@@ -289,7 +293,7 @@ app.get("/urls/new", (req, res) => {
 //                       - logged in, different user = shows 403 error
 //                       - logged out = show 401 error
 //                       - invalid id = show 404 error
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id", (req, res) => {
 
   // shortlink ID not found
   if (!urlDatabase.hasOwnProperty(req.params.id)) {
