@@ -1,4 +1,6 @@
 // Requires
+// --------
+
 require("dotenv").config();
 var express = require("express");
 const bodyParser = require("body-parser");
@@ -7,20 +9,17 @@ const bcrypt = require("bcrypt");
 const methodOverride = require('method-override');
 
 // Init app
-var app = express();
+// --------
+
+const app = express();
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: "session",
   secret: "teehee",
-
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  maxAge: 24 * 60 * 60 * 1000
 }));
-
-// override with POST having ?_method=DELETE
 app.use(methodOverride('_method'))
-
 app.set("view engine", "ejs");
 
 // Data
@@ -42,6 +41,7 @@ var urlDatabase = {};
 var users = {};
 
 // Functions
+// ---------
 
 function addUser(userId, userEmail, userPassword) {
   users[userId] = { id: userId,
@@ -59,12 +59,10 @@ function addURL(shortCode, longURL, userId) {
                            };
 }
 
-// Checks session cookie to see if user is logged in
 function amILoggedIn(req) {
   return (Object.keys(req.session).length !== 0);
 }
 
-// Generates a random string of a certain length using alphanumeric characters
 function generateRandomString(length) {
   const legalCharacters = "0123456789ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   let output = "";
@@ -76,7 +74,6 @@ function generateRandomString(length) {
   return output;
 }
 
-// Returns a list of URLs filtered by user
 function filterURLsByUser (user) {
 
   let filteredList = {};
@@ -103,14 +100,25 @@ function protocolFixer (url) {
   }
 }
 
+// Sends a response to render a page (with HTTP 200) with default and optional template variables
+function sendRenderResponse (req, res, page, addParams) {
+    let templateVars = { user: req.session.user };
+
+    for (param in addParams) {
+      templateVars[param] = addParams[param];
+    }
+
+    return res.status(200).render(page, templateVars);
+}
+
 // Sends error responses (i.e. 403, 401, 404) with default template variables
 function sendErrorResponse (errorCode, req, res, page) {
   let templateVars = { user: req.session.user };
   return res.status(errorCode).render(page, templateVars);
 }
 
-// Home Page
-// ---------
+// Server Functions
+// ----------------
 
 // GET root - logged in = redirect to login page
 //          - logged out = redirect to user's shortlink list
@@ -133,33 +141,28 @@ app.post("/login", (req, res) => {
 
   let email = req.body.email;
   let password = req.body.password;
-  let user = undefined;
-
-  // find user in database
+  let curentUser = undefined;
 
   for (i in users) {
     if (users[i]["email"] === email) {
-      user = users[i];
+      curentUser = users[i];
       break;
     }
   }
 
-  if (!user) {
-    let templateVars = { user: req.session.user };
-    return res.status(200).render("error_invalidCredentials", templateVars);
+  if (!curentUser) {
+    return sendRenderResponse(req, res, "error_invalidCredentials");
   }
 
-  // check user password hash
-  if (bcrypt.compareSync(password, user["passHash"])) {
-    req.session.user = user;
-    console.log("Logged in as:" + user["id"] + " - " + user["email"]);
+  if (bcrypt.compareSync(password, curentUser["passHash"])) {
+    req.session.user = curentUser;
+    console.log("User logged in as:" + curentUser["id"] + " - " + curentUser["email"]);
     return res.status(302).redirect("/");
-
   } else {
-    let templateVars = { user: req.session.user };
-    return res.status(200).render("error_invalidCredentials", templateVars);
+    sendRenderResponse(req, res, "error_invalidCredentials");
   }
 });
+
 
 // GET /login - logged in = go to user's URL list
 //            - logged out = go to login page
@@ -169,20 +172,23 @@ app.get("/login", (req, res) => {
     return res.status(302).redirect("/urls");
   }
 
-  let templateVars = { user: req.session.user };
-  res.status(200).render("user_login", templateVars);
+  sendRenderResponse(req, res, "user_login");
 });
+
 
 // POST /logout - log out of the service
 app.post("/logout", (req, res) => {
+
   req.session = null;
   res.status(302).redirect("/");
 });
 
+
 // GET /logout - this shouldn't happen
 app.get("/logout", (req, res) => {
-  res.status(401).send("Forbidden");
+  sendErrorRepsonse(401, req, res, "error_401");
 });
+
 
 // POST /register - creates a new account
 app.post("/register", (req, res) => {
@@ -192,19 +198,16 @@ app.post("/register", (req, res) => {
 
   // disallow blank emails and passwords
   if (!email || !password) {
-    let templateVars = { user: req.session.user };
-    return res.status(200).render("error_invalidCredentials", templateVars);
+    return sendRenderResponse(req, res, "error_invalidCredentials");
   }
 
   // disallow duplicate emails
   for (user in users) {
     if (users[user]["email"] === email) {
-      let templateVars = { user: req.session.user };
-      return res.status(200).render("error_duplicateEmail", templateVars);
+      return sendRenderResponse(req, res, "error_duplicateEmail");
     }
   }
 
-  // ok
   let randomID = generateRandomString(6);
   let hash = bcrypt.hashSync(req.body.password, 10);
   addUser(randomID, req.body.email, hash);
@@ -214,6 +217,7 @@ app.post("/register", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
+
 // GET /register - logged in = go to user's URL list
 //               - logged out = opens registration page
 app.get("/register", (req, res) => {
@@ -222,20 +226,19 @@ app.get("/register", (req, res) => {
     return res.status(302).redirect("/urls");
   }
 
-  let templateVars = { user: req.session.user }
-  res.status(200).render("user_reg", templateVars);
-})
+  sendRenderResponse(req, res, "error_invalidCredentials");
+});
 
 // Shortlink Redirection
 // ---------------------
 
-// GET /u/:id - redirect to full URL
-app.get("/u/:shortCode", (req, res) => {
 
-  let shortCode = req.params.shortCode;
+// GET /u/:id - redirect to full URL
+app.get("/u/:id", (req, res) => {
+
+  let shortCode = req.params.id;
 
   if (!urlDatabase.hasOwnProperty(shortCode)) {
-    console.log("404'd!");
     return sendErrorResponse(404, req, res, "error_404");
   }
 
@@ -247,18 +250,18 @@ app.get("/u/:shortCode", (req, res) => {
 // URL Database CRUD
 // -----------------
 
+
 // GET /urls - logged in = shows a list of all URLs associated with user
 //           - logged out = redirect to login page
 app.get("/urls", (req, res) => {
 
-  // check to see if user is logged in, if not go to login page
   if (!amILoggedIn(req)) {
     return sendErrorResponse(401, req, res, "error_401");
   }
 
-  let templateVars = { urls: filterURLsByUser(req.session.user), user: req.session.user };
-  res.status(200).render("urls_index", templateVars);
+  sendRenderResponse(req, res, "urls_index", { urls: filterURLsByUser(req.session.user) });
 });
+
 
 // POST /urls - logged in = submit a new URL
 //            - logged out = show 401 error
@@ -277,6 +280,7 @@ app.post("/urls", (req, res) => {
 
 });
 
+
 // GET /urls/new - logged in = shows URL submission form
 //               - logged out = redirect to 401 page
 app.get("/urls/new", (req, res) => {
@@ -285,9 +289,9 @@ app.get("/urls/new", (req, res) => {
     return res.status(302).redirect("/login");
   }
 
-  let templateVars = { user: req.session.user };
-  res.status(200).render("urls_new", templateVars);
+  sendRenderResponse(req, res, "urls_new");
 });
+
 
 // DELETE /urls/:id - deletes a URL
 //                  - logged in, different user = shows 403 error
@@ -315,6 +319,7 @@ app.delete("/urls/:id", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
+
 // PUT /urls/:id - logged in, same user = updates a URL
 //               - logged in, different user = shows 403 error
 //               - logged out = show 401 error
@@ -336,10 +341,10 @@ app.put("/urls/:id", (req, res) => {
     return sendErrorResponse(403, req, res, "error_403");
   }
 
-  console.log("Update", req.params.id);
   urlDatabase[req.params.id]["url"] = protocolFixer(req.body.longURL);
   res.status(302).redirect("/urls");
 });
+
 
 // GET /urls/:id - logged in, same user = shows the URL and its shortlink
 //               - logged in, different user = shows 403 error
@@ -362,22 +367,25 @@ app.get("/urls/:id", (req, res) => {
     return sendErrorResponse(403, req, res, "error_403");
   }
 
-  let templateVars = { urlInfo: urlDatabase[req.params.id], shortURL: req.params.id, user: req.session.user };
-  res.status(200).render("urls_show", templateVars);
-})
+  sendRenderResponse(req, res, "urls_show", { urlInfo: urlDatabase[req.params.id], shortURL: req.params.id });
+});
+
 
 // GET /urls.json - shows URL database in JSON format
 app.get("/urls.json", (req, res) => {
   res.status(200).json(urlDatabase);
 });
 
+
 // GET /teapot - easter egg
 app.get("/teapot", (req, res) => {
     let templateVars = { user: req.session.user };
-    console.log("Teapot easter egg");
+    console.log("Someone found the easter egg!");
     res.status(418).render("im_a_teapot", templateVars);
 });
 
+// Start Here
+// ----------
 
 // Populate databases with users and URLs
 addUser("aaaaaa", "kingroland@druidia.net", "12345");
@@ -391,8 +399,6 @@ addURL("9sm5xK", "http://www.google.com", "eeeeee");
 addURL("teapot", "http://www.google.com/teapot", "eeeeee");
 addURL("lugage", "http://www.luggage.com", "bbbbbb");
 addURL("9sm5xK", "http://www.benderisgreat.com", "dddddd");
-
-console.log(users);
 
 // Start server
 app.listen(PORT, () => {
