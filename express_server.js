@@ -21,7 +21,20 @@ app.set("view engine", "ejs");
 
 // Data
 var PORT = process.env.MY_PORT || 8080;
+
+// URL entry format:
+// <shortlink>: { url: String,
+//                user_id: String,
+//                dateCreated: Date,
+//                hits: Number}
+
 var urlDatabase = {};
+
+// User entry format:
+// <userId> : { id: String,
+//              email: String,
+//              pasHash: String}
+
 var users = {};
 
 // Functions
@@ -266,13 +279,25 @@ app.post("/urls/:id/update", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
-// GET /urls/:id - shows the URL and its shortlink
+// GET /urls/:id - logged in, same user = shows the URL and its shortlink
+//               - logged in, different user = shows 401 error
+//               - logged out = show 403 error
+//               - invalid id = show 404 error
 app.get("/urls/:id", (req, res) => {
 
   // shortlink ID not found
-
   if (!urlDatabase.hasOwnProperty(req.params.id)) {
     return sendErrorResponse(404, req, res, "error_404");
+  }
+
+  // logged out
+  if (!amILoggedIn(req)) {
+    return sendErrorResponse(403, req, res, "error_403");
+  }
+
+  // wrong user
+  if (urlDatabase[req.params.id]["user_id"] !== req.session.user["id"]) {
+    return sendErrorResponse(401, req, res, "error_401");
   }
 
   let templateVars = { urlInfo: urlDatabase[req.params.id], shortURL: req.params.id, user: req.session.user };
