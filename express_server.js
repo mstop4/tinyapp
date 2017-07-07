@@ -141,7 +141,8 @@ app.post("/login", (req, res) => {
   }
 
   if (!user) {
-    return res.status(403).send("Invalid email.");
+    let templateVars = { user: req.session.user };
+    return res.status(200).render("error_invalidCredentials", templateVars);
   }
 
   // check user password hash
@@ -151,12 +152,19 @@ app.post("/login", (req, res) => {
     return res.status(302).redirect("/");
 
   } else {
-    return res.status(403).send("Invalid password.");
+    let templateVars = { user: req.session.user };
+    return res.status(200).render("error_invalidCredentials", templateVars);
   }
 });
 
-// GET /login - go to login page
+// GET /login - logged in = go to user's URL list
+//            - logged out = go to login page
 app.get("/login", (req, res) => {
+
+  if (amILoggedIn(req)) {
+    return res.status(302).redirect("/urls");
+  }
+
   let templateVars = { user: req.session.user };
   res.status(200).render("user_login", templateVars);
 });
@@ -180,13 +188,15 @@ app.post("/register", (req, res) => {
 
   // disallow blank emails and passwords
   if (!email || !password) {
-    return res.status(400).send("Invalid email or password!");
+    let templateVars = { user: req.session.user };
+    return res.status(200).render("error_invalidCredentials", templateVars);
   }
 
   // disallow duplicate emails
   for (user in users) {
     if (users[user]["email"] === email) {
-       return res.status(400).send("That email is already registered!");
+      let templateVars = { user: req.session.user };
+      return res.status(200).render("error_duplicateEmail", templateVars);
     }
   }
 
@@ -200,8 +210,13 @@ app.post("/register", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
-// GET /register - opens registration page
+// GET /register - logged in = go to user's URL list
+//               - logged out = opens registration page
 app.get("/register", (req, res) => {
+
+  if (amILoggedIn(req)) {
+    return res.status(302).redirect("/urls");
+  }
 
   let templateVars = { user: req.session.user }
   res.status(200).render("user_reg", templateVars);
