@@ -99,7 +99,7 @@ function protocolFixer (url) {
   }
 }
 
-// Sends error responses with template variables
+// Sends error responses (i.e. 401, 403, 404) with default template variables
 function sendErrorResponse (errorCode, req, res, page) {
   let templateVars = { user: req.session.user };
   return res.status(errorCode).render(page, templateVars);
@@ -121,8 +121,8 @@ app.get("/", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
-// User Authentication
-// -------------------
+// User Database CRUD & Authentication
+// -----------------------------------
 
 // POST /login - log into the service
 app.post("/login", (req, res) => {
@@ -207,7 +207,7 @@ app.get("/register", (req, res) => {
   res.status(200).render("user_reg", templateVars);
 })
 
-// Shortlink redirection
+// Shortlink Redirection
 // ---------------------
 
 // GET /u/:id - redirect to full URL
@@ -225,8 +225,8 @@ app.get("/u/:shortCode", (req, res) => {
   res.status(302).redirect(longURL);
 });
 
-// Database query
-// --------------
+// URL Database CRUD
+// -----------------
 
 // GET /urls - logged in = shows a list of all URLs associated with user
 //           - logged out = redirect to login page
@@ -271,14 +271,52 @@ app.get("/urls/new", (req, res) => {
 });
 
 // POST /urls/:id/delete - deletes a URL
+//                       - logged in, different user = shows 401 error
+//                       - logged out = show 403 error
+//                       - invalid id = show 404 error
 app.post("/urls/:id/delete", (req, res) => {
+
+  // shortlink ID not found
+  if (!urlDatabase.hasOwnProperty(req.params.id)) {
+    return sendErrorResponse(404, req, res, "error_404");
+  }
+
+  // logged out
+  if (!amILoggedIn(req)) {
+    return sendErrorResponse(403, req, res, "error_403");
+  }
+
+  // wrong user
+  if (urlDatabase[req.params.id]["user_id"] !== req.session.user["id"]) {
+    return sendErrorResponse(401, req, res, "error_401");
+  }
+
   console.log("Delete", req.params.id);
   delete urlDatabase[req.params.id];
   res.status(302).redirect("/urls");
 });
 
-// POST /urls/:id/update - updates a URL
-app.post("/urls/:id/update", (req, res) => {
+// POST /urls/:id - logged in, same user = updates a URL
+//                - logged in, different user = shows 401 error
+//                - logged out = show 403 error
+//                - invalid id = show 404 error
+app.post("/urls/:id", (req, res) => {
+
+  // shortlink ID not found
+  if (!urlDatabase.hasOwnProperty(req.params.id)) {
+    return sendErrorResponse(404, req, res, "error_404");
+  }
+
+  // logged out
+  if (!amILoggedIn(req)) {
+    return sendErrorResponse(403, req, res, "error_403");
+  }
+
+  // wrong user
+  if (urlDatabase[req.params.id]["user_id"] !== req.session.user["id"]) {
+    return sendErrorResponse(401, req, res, "error_401");
+  }
+
   console.log("Update", req.params.id);
   urlDatabase[req.params.id]["url"] = protocolFixer(req.body.longURL);
   res.status(302).redirect("/urls");
