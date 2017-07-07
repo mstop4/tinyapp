@@ -11,8 +11,25 @@
 
   <main>
     <ul>
-      <h2>Shortlink</h2>
-      <p><a href="../u/<%= shortURL %>">http://localhost:8080/u/<strong><%= shortURL %></strong></a> -----> <strong><a href="<%= longURL %>"><%= longURL %></a></strong></p>
+      <h2>Shortlink Info</h2>
+      <table>
+        <tr>
+          <th>Shortlink</th>
+          <td><a href="../u/<%= shortURL %>">http://localhost:8080/u/<strong><%= shortURL %></strong></a></td>
+        </tr>
+        <tr>
+          <th>Full URL</th>
+          <td><strong><a href="<%= urlInfo['url'] %>"><%= urlInfo['url'] %></a></strong></td>
+        </tr>
+        <tr>
+          <th>Date Created</th>
+          <td><%= urlInfo["dateCreated"] %></td>
+        </tr>
+        <tr>
+          <th>Hits</th>
+          <td><%= urlInfo["hits"] %></td>
+        </tr>
+      </table>
 
       <h3>Update this shortlink</h3>
       <form method="POST" action="/urls/<%= shortURL %>/update">

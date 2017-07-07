@@ -86,10 +86,10 @@ function protocolFixer (url) {
   }
 }
 
-// Sends 403 (Forbidden) response with template variables
-function sendResponse403 (req, res, page) {
+// Sends error responses with template variables
+function sendErrorResponse (errorCode, req, res, page) {
   let templateVars = { user: req.session.user };
-  return res.status(403).render(page, templateVars);
+  return res.status(errorCode).render(page, templateVars);
 }
 
 // Home Page
@@ -119,10 +119,8 @@ app.post("/login", (req, res) => {
   let user = undefined;
 
   // find user in database
-  console.log(users);
+
   for (i in users) {
-    console.log(users[i]);
-    console.log(email + " <--> " + users[i]["email"]);
     if (users[i]["email"] === email) {
       user = users[i];
       break;
@@ -206,15 +204,12 @@ app.get("/u/:shortCode", (req, res) => {
 
   if (!urlDatabase.hasOwnProperty(shortCode)) {
     console.log("404'd!");
-    let templateVars = { user: req.session.user };
-    return res.status(404).render("error_404", templateVars);
+    return sendErrorResponse(404, req, res, "error_404");
   }
 
-  else {
-    urlDatabase[shortCode]["hits"]++;
-    let longURL = urlDatabase[req.params.shortCode]["url"];
-    return res.status(302).redirect(longURL);
-  }
+  urlDatabase[shortCode]["hits"]++;
+  let longURL = urlDatabase[req.params.shortCode]["url"];
+  res.status(302).redirect(longURL);
 });
 
 // Database query
@@ -226,7 +221,7 @@ app.get("/urls", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
   if (!amILoggedIn(req)) {
-    return sendResponse403(req, res, "error_403");
+    return sendErrorResponse(403, req, res, "error_403");
   }
 
   let templateVars = { urls: filterURLsByUser(req.session.user), user: req.session.user };
@@ -274,12 +269,13 @@ app.post("/urls/:id/update", (req, res) => {
 // GET /urls/:id - shows the URL and its shortlink
 app.get("/urls/:id", (req, res) => {
 
+  // shortlink ID not found
+
   if (!urlDatabase.hasOwnProperty(req.params.id)) {
-    let templateVars = { user: req.session.user };
-    return res.status(404).render("error_404", templateVars);
+    return sendErrorResponse(404, req, res, "error_404");
   }
 
-  let templateVars = { longURL: urlDatabase[req.params.id]["url"], shortURL: req.params.id, user: req.session.user };
+  let templateVars = { urlInfo: urlDatabase[req.params.id], shortURL: req.params.id, user: req.session.user };
   res.status(200).render("urls_show", templateVars);
 })
 
