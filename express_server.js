@@ -99,7 +99,7 @@ function protocolFixer (url) {
   }
 }
 
-// Sends error responses (i.e. 401, 403, 404) with default template variables
+// Sends error responses (i.e. 403, 401, 404) with default template variables
 function sendErrorResponse (errorCode, req, res, page) {
   let templateVars = { user: req.session.user };
   return res.status(errorCode).render(page, templateVars);
@@ -177,7 +177,7 @@ app.post("/logout", (req, res) => {
 
 // GET /logout - this shouldn't happen
 app.get("/logout", (req, res) => {
-  res.status(403).send("Forbidden");
+  res.status(401).send("Forbidden");
 });
 
 // POST /register - creates a new account
@@ -249,7 +249,7 @@ app.get("/urls", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
   if (!amILoggedIn(req)) {
-    return sendErrorResponse(403, req, res, "error_403");
+    return sendErrorResponse(401, req, res, "error_401");
   }
 
   let templateVars = { urls: filterURLsByUser(req.session.user), user: req.session.user };
@@ -257,11 +257,11 @@ app.get("/urls", (req, res) => {
 });
 
 // POST /urls - logged in = submit a new URL
-//            - logged out = show 403 error
+//            - logged out = show 401 error
 app.post("/urls", (req, res) => {
 
   if (!amILoggedIn(req)) {
-    return sendErrorResponse(403, req, res, "error_403");
+    return sendErrorResponse(401, req, res, "error_401");
   }
 
   let longURL = protocolFixer(req.body.longURL);
@@ -274,7 +274,7 @@ app.post("/urls", (req, res) => {
 });
 
 // GET /urls/new - logged in = shows URL submission form
-//               - logged out = redirect to 403 page
+//               - logged out = redirect to 401 page
 app.get("/urls/new", (req, res) => {
 
   if (!amILoggedIn(req)) {
@@ -286,8 +286,8 @@ app.get("/urls/new", (req, res) => {
 });
 
 // POST /urls/:id/delete - deletes a URL
-//                       - logged in, different user = shows 401 error
-//                       - logged out = show 403 error
+//                       - logged in, different user = shows 403 error
+//                       - logged out = show 401 error
 //                       - invalid id = show 404 error
 app.post("/urls/:id/delete", (req, res) => {
 
@@ -298,12 +298,12 @@ app.post("/urls/:id/delete", (req, res) => {
 
   // logged out
   if (!amILoggedIn(req)) {
-    return sendErrorResponse(403, req, res, "error_403");
+    return sendErrorResponse(401, req, res, "error_401");
   }
 
   // wrong user
   if (urlDatabase[req.params.id]["user_id"] !== req.session.user["id"]) {
-    return sendErrorResponse(401, req, res, "error_401");
+    return sendErrorResponse(403, req, res, "error_403");
   }
 
   console.log("Delete", req.params.id);
@@ -312,8 +312,8 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 // POST /urls/:id - logged in, same user = updates a URL
-//                - logged in, different user = shows 401 error
-//                - logged out = show 403 error
+//                - logged in, different user = shows 403 error
+//                - logged out = show 401 error
 //                - invalid id = show 404 error
 app.post("/urls/:id", (req, res) => {
 
@@ -324,12 +324,12 @@ app.post("/urls/:id", (req, res) => {
 
   // logged out
   if (!amILoggedIn(req)) {
-    return sendErrorResponse(403, req, res, "error_403");
+    return sendErrorResponse(401, req, res, "error_401");
   }
 
   // wrong user
   if (urlDatabase[req.params.id]["user_id"] !== req.session.user["id"]) {
-    return sendErrorResponse(401, req, res, "error_401");
+    return sendErrorResponse(403, req, res, "error_403");
   }
 
   console.log("Update", req.params.id);
@@ -338,8 +338,8 @@ app.post("/urls/:id", (req, res) => {
 });
 
 // GET /urls/:id - logged in, same user = shows the URL and its shortlink
-//               - logged in, different user = shows 401 error
-//               - logged out = show 403 error
+//               - logged in, different user = shows 403 error
+//               - logged out = show 401 error
 //               - invalid id = show 404 error
 app.get("/urls/:id", (req, res) => {
 
@@ -350,12 +350,12 @@ app.get("/urls/:id", (req, res) => {
 
   // logged out
   if (!amILoggedIn(req)) {
-    return sendErrorResponse(403, req, res, "error_403");
+    return sendErrorResponse(401, req, res, "error_401");
   }
 
   // wrong user
   if (urlDatabase[req.params.id]["user_id"] !== req.session.user["id"]) {
-    return sendErrorResponse(401, req, res, "error_401");
+    return sendErrorResponse(403, req, res, "error_403");
   }
 
   let templateVars = { urlInfo: urlDatabase[req.params.id], shortURL: req.params.id, user: req.session.user };

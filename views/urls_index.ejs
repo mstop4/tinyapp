@@ -10,28 +10,33 @@
   </header>
 
   <main>
-    <!-- List all URLs with an edit and delete button -->
-    <table>
-      <tr>
-        <th>Shortlink</th>
-        <th>Original URL</th>
-        <th>Date Created</th>
-        <th>Hits</th>
-        <th>Tools</th>
-      </tr>
-      <% for (key in urls) { %>
+
+    <% if (Object.keys(urls).length === 0) { %>
+      <p>You have no shortlinks. Why don't you try <a href="/urls/new">making one now?</a></p>
+    <% } else { %>
+      <!-- List all URLs with an edit and delete button -->
+      <table>
         <tr>
-          <td><a href="http://localhost:8080/u/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a></td>
-          <td><a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a></td>
-          <td><%= urls[key]["dateCreated"].toString() %></td>
-          <td><%= urls[key]["hits"] %></td>
-          <td>
-            <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
-            <form class="urlItem" method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
-          </td>
+          <th>Shortlink</th>
+          <th>Original URL</th>
+          <th>Date Created</th>
+          <th>Hits</th>
+          <th>Tools</th>
         </tr>
-      <% }; %>
-    </table>
+        <% for (key in urls) { %>
+          <tr>
+            <td><a href="http://localhost:8080/u/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a></td>
+            <td><a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a></td>
+            <td><%= urls[key]["dateCreated"].toString() %></td>
+            <td><%= urls[key]["hits"] %></td>
+            <td>
+              <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
+              <form class="urlItem" method="POST" action="/urls/<%= key %>/delete"><input type="submit" value="Delete"></form>
+            </td>
+          </tr>
+        <% }; %>
+      </table>
+    <% }; %>
   </main>
 
   <footer>
