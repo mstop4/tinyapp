@@ -241,8 +241,13 @@ app.get("/urls", (req, res) => {
   res.status(200).render("urls_index", templateVars);
 });
 
-// POST /urls - submit a new URL
+// POST /urls - logged in = submit a new URL
+//            - logged out = show 403 error
 app.post("/urls", (req, res) => {
+
+  if (!amILoggedIn(req)) {
+    return res.status(302).redirect("/login");
+  }
 
   let longURL = protocolFixer(req.body.longURL);
   let shortCode = generateRandomString(6);
@@ -253,8 +258,8 @@ app.post("/urls", (req, res) => {
 
 });
 
-// GET /urls/new - logged in - shows URL submission form
-//               - logged out - redirect to 403 page
+// GET /urls/new - logged in = shows URL submission form
+//               - logged out = redirect to 403 page
 app.get("/urls/new", (req, res) => {
 
   if (!amILoggedIn(req)) {
