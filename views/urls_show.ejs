@@ -23,7 +23,7 @@
         </tr>
         <tr>
           <th>Date Created</th>
-          <td><%= urlInfo["dateCreated"] %></td>
+          <td><%= urls[key]["dateCreated"].toDateString() %> <%= urls[key]["dateCreated"].toLocaleTimeString() %></td>
         </tr>
         <tr>
           <th>Hits</th>

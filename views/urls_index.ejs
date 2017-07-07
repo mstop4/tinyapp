@@ -27,7 +27,7 @@
           <tr>
             <td><a href="http://localhost:8080/u/<%= key %>">localhost:8080/u/<strong><%= key %></strong></a></td>
             <td><a href="<%= urls[key]['url'] %>"><%= urls[key]["url"] %></a></td>
-            <td><%= urls[key]["dateCreated"].toString() %></td>
+            <td><%= urls[key]["dateCreated"].toDateString() %> <%= urls[key]["dateCreated"].toLocaleTimeString() %></td>
             <td><%= urls[key]["hits"] %></td>
             <td>
               <form class="urlItem" method="GET" action="./urls/<%= key %>"><input type="submit" value="Edit"></form>
