@@ -289,10 +289,10 @@ app.get("/urls/new", (req, res) => {
   res.status(200).render("urls_new", templateVars);
 });
 
-// POST /urls/:id/delete - deletes a URL
-//                       - logged in, different user = shows 403 error
-//                       - logged out = show 401 error
-//                       - invalid id = show 404 error
+// DELETE /urls/:id - deletes a URL
+//                  - logged in, different user = shows 403 error
+//                  - logged out = show 401 error
+//                  - invalid id = show 404 error
 app.delete("/urls/:id", (req, res) => {
 
   // shortlink ID not found
@@ -315,11 +315,11 @@ app.delete("/urls/:id", (req, res) => {
   res.status(302).redirect("/urls");
 });
 
-// POST /urls/:id - logged in, same user = updates a URL
-//                - logged in, different user = shows 403 error
-//                - logged out = show 401 error
-//                - invalid id = show 404 error
-app.post("/urls/:id", (req, res) => {
+// PUT /urls/:id - logged in, same user = updates a URL
+//               - logged in, different user = shows 403 error
+//               - logged out = show 401 error
+//               - invalid id = show 404 error
+app.put("/urls/:id", (req, res) => {
 
   // shortlink ID not found
   if (!urlDatabase.hasOwnProperty(req.params.id)) {

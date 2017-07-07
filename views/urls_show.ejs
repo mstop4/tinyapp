@@ -23,7 +23,7 @@
         </tr>
         <tr>
           <th>Date Created</th>
-          <td><%= urls[key]["dateCreated"].toDateString() %> <%= urls[key]["dateCreated"].toLocaleTimeString() %></td>
+          <td><%= urlInfo["dateCreated"].toDateString() %> <%= urlInfo["dateCreated"].toLocaleTimeString() %></td>
         </tr>
         <tr>
           <th>Hits</th>
@@ -32,7 +32,7 @@
       </table>
 
       <h3>Update this shortlink</h3>
-      <form method="POST" action="/urls/<%= shortURL %>">
+      <form method="POST" action="/urls/<%= shortURL %>?_method=PUT">
         <label for="longURL">Enter a new URL:</label>
         <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
         <input type="submit" value="Update">
