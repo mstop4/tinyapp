@@ -1,4 +1,3 @@
-
 // Requires
 require("dotenv").config();
 var express = require("express");
@@ -87,20 +86,26 @@ function protocolFixer (url) {
   }
 }
 
+// Sends 403 (Forbidden) response with template variables
+function sendResponse403 (req, res, page) {
+  let templateVars = { user: req.session.user };
+  return res.status(403).render(page, templateVars);
+}
+
 // Home Page
 // ---------
 
-// GET root - redirect to login page if not logged in
-//          - redirect to user's shortlink lisst if logged in
+// GET root - logged in = redirect to login page
+//          - logged out = redirect to user's shortlink list
 app.get("/", (req, res) => {
 
   let templateVars = { user: req.session.user };
 
   if (!amILoggedIn(req)) {
     return res.status(302).redirect("/login");
-  } else {
-    res.status(302).redirect("/urls");
   }
+
+  res.status(302).redirect("/urls");
 });
 
 // User Authentication
@@ -215,12 +220,13 @@ app.get("/u/:shortCode", (req, res) => {
 // Database query
 // --------------
 
-// GET /urls - shows a list of all URLs associated with user
+// GET /urls - logged in = shows a list of all URLs associated with user
+//           - logged out = redirect to login page
 app.get("/urls", (req, res) => {
 
   // check to see if user is logged in, if not go to login page
   if (!amILoggedIn(req)) {
-    return res.status(302).redirect("/login");
+    return sendResponse403(req, res, "error_403");
   }
 
   let templateVars = { urls: filterURLsByUser(req.session.user), user: req.session.user };
@@ -239,10 +245,10 @@ app.post("/urls", (req, res) => {
 
 });
 
-// GET /urls/new - shows URL submission form
+// GET /urls/new - logged in - shows URL submission form
+//               - logged out - redirect to 403 page
 app.get("/urls/new", (req, res) => {
 
-  // check to see if user is logged in, if not go to login page
   if (!amILoggedIn(req)) {
     return res.status(302).redirect("/login");
   }
