@@ -22,8 +22,10 @@ app.use(cookieSession({
 app.use(methodOverride('_method'))
 app.set("view engine", "ejs");
 
-// Data
 var PORT = process.env.MY_PORT || 8080;
+
+// Databases
+// ---------
 
 // URL entry format:
 // <shortlink>: { url: String,
@@ -40,8 +42,8 @@ var urlDatabase = {};
 
 var users = {};
 
-// Functions
-// ---------
+// Helper Functions
+// ----------------
 
 function addUser(userId, userEmail, userPassword) {
   users[userId] = { id: userId,
@@ -75,7 +77,6 @@ function generateRandomString(length) {
 }
 
 function filterURLsByUser (user) {
-
   let filteredList = {};
 
   if (!user) {
@@ -92,7 +93,6 @@ function filterURLsByUser (user) {
 
 // Append "http://" to URL if it doesn't already have it to prevent 404 errors
 function protocolFixer (url) {
-
   if (url.indexOf("http://") !== 0) {
     return "http://" + url;
   } else {
@@ -111,7 +111,7 @@ function sendRenderResponse (req, res, page, addParams) {
     return res.status(200).render(page, templateVars);
 }
 
-// Sends error responses (i.e. 403, 401, 404) with default template variables
+// Sends error responses (i.e. HTTP 401, 403, 404) with default template variables
 function sendErrorResponse (errorCode, req, res, page) {
   let templateVars = { user: req.session.user };
   return res.status(errorCode).render(page, templateVars);
@@ -127,10 +127,10 @@ app.get("/", (req, res) => {
   let templateVars = { user: req.session.user };
 
   if (!amILoggedIn(req)) {
-    return res.status(302).redirect("/login");
+    return res.redirect(302, "/login");
   }
 
-  res.status(302).redirect("/urls");
+  res.redirect(302, "/urls");
 });
 
 // User Database CRUD & Authentication
@@ -142,6 +142,8 @@ app.post("/login", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   let curentUser = undefined;
+
+  // Verify the user's email and password
 
   for (i in users) {
     if (users[i]["email"] === email) {
@@ -157,7 +159,7 @@ app.post("/login", (req, res) => {
   if (bcrypt.compareSync(password, curentUser["passHash"])) {
     req.session.user = curentUser;
     console.log("User logged in as:" + curentUser["id"] + " - " + curentUser["email"]);
-    return res.status(302).redirect("/");
+    return res.redirect(302, "/");
   } else {
     sendRenderResponse(req, res, "error_invalidCredentials");
   }
@@ -169,7 +171,7 @@ app.post("/login", (req, res) => {
 app.get("/login", (req, res) => {
 
   if (amILoggedIn(req)) {
-    return res.status(302).redirect("/urls");
+    return res.redirect(302, "/urls");
   }
 
   sendRenderResponse(req, res, "user_login");
@@ -180,7 +182,7 @@ app.get("/login", (req, res) => {
 app.post("/logout", (req, res) => {
 
   req.session = null;
-  res.status(302).redirect("/");
+  res.redirect(302, "/");
 });
 
 
@@ -214,7 +216,7 @@ app.post("/register", (req, res) => {
   req.session.user = users[randomID];
 
   console.log("Logged in as:" + randomID + " - " + req.body.email);
-  res.status(302).redirect("/urls");
+  res.redirect(302, "/urls");
 });
 
 
@@ -223,10 +225,10 @@ app.post("/register", (req, res) => {
 app.get("/register", (req, res) => {
 
   if (amILoggedIn(req)) {
-    return res.status(302).redirect("/urls");
+    return res.redirect(302, "/urls");
   }
 
-  sendRenderResponse(req, res, "error_invalidCredentials");
+  sendRenderResponse(req, res, "user_reg");
 });
 
 // Shortlink Redirection
@@ -244,7 +246,7 @@ app.get("/u/:id", (req, res) => {
 
   urlDatabase[shortCode]["hits"]++;
   let longURL = urlDatabase[req.params.shortCode]["url"];
-  res.status(302).redirect(longURL);
+  res.redirect(302, longURL);
 });
 
 // URL Database CRUD
@@ -276,7 +278,7 @@ app.post("/urls", (req, res) => {
 
   addURL(shortCode, longURL, req.session.user["id"]);
   console.log(longURL, " --> ", shortCode);
-  res.status(302).redirect("/urls/" + shortCode);
+  res.redirect(302, "/urls/" + shortCode);
 
 });
 
@@ -286,7 +288,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
 
   if (!amILoggedIn(req)) {
-    return res.status(302).redirect("/login");
+    return res.redirect(302, "/login");
   }
 
   sendRenderResponse(req, res, "urls_new");
@@ -316,7 +318,7 @@ app.delete("/urls/:id", (req, res) => {
 
   console.log("Delete", req.params.id);
   delete urlDatabase[req.params.id];
-  res.status(302).redirect("/urls");
+  res.redirect(302, "/urls");
 });
 
 
@@ -342,7 +344,7 @@ app.put("/urls/:id", (req, res) => {
   }
 
   urlDatabase[req.params.id]["url"] = protocolFixer(req.body.longURL);
-  res.status(302).redirect("/urls");
+  res.redirect(302, "/urls");
 });
 
 
@@ -371,18 +373,13 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
-// GET /urls.json - shows URL database in JSON format
-app.get("/urls.json", (req, res) => {
-  res.status(200).json(urlDatabase);
-});
-
-
 // GET /teapot - easter egg
 app.get("/teapot", (req, res) => {
     let templateVars = { user: req.session.user };
     console.log("Someone found the easter egg!");
     res.status(418).render("im_a_teapot", templateVars);
 });
+
 
 // Start Here
 // ----------
