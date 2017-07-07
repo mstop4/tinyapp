@@ -246,7 +246,7 @@ app.get("/urls", (req, res) => {
 app.post("/urls", (req, res) => {
 
   if (!amILoggedIn(req)) {
-    return res.status(302).redirect("/login");
+    return sendErrorResponse(403, req, res, "error_403");
   }
 
   let longURL = protocolFixer(req.body.longURL);
