@@ -56,6 +56,8 @@ form.urlItem {
 
 input {
   font-family: 'Poppins', sans-serif;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 input[type="text"],

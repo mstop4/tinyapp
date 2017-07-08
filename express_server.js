@@ -414,5 +414,5 @@ addURL("9sm5xK", "http://www.benderisgreat.com", "dddddd");
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp listening on port ${PORT}!`);
 });

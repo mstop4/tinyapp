@@ -1,5 +1,7 @@
 # TinyApp - URL Shortener
 
+
+
 ## Dependencies
 
 - Node.js
@@ -12,10 +14,5 @@
 
 ## How to Use in Two Easy Steps
 
-- Install all dependencies:
-
-> `npm install --save`
-
-- Start the web server:
-
-> `npm start`
+- Install all dependencies: `npm install --save`
+- Start the web server: `npm start`
