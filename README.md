@@ -8,9 +8,9 @@ Partially HTCPCP-compliant.
 
 ## Screenshots
 
-!["Login Page"](#)
-!["Personal URL List"](#)
-!["Shortlink Info"](#)
+!["Login Page"](https://github.com/mstop4/w2-tinyapp/blob/master/docs/login-page.png)
+!["Personal URL List"](https://github.com/mstop4/w2-tinyapp/blob/master/docs/url-list.png)
+!["Shortlink Info"](https://github.com/mstop4/w2-tinyapp/blob/master/docs/shortlink-info.png)
 
 ## Dependencies
 
