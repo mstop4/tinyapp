@@ -9,16 +9,17 @@
       <% include ./partials/_header %>
     </header>
 
-    <h2>Enter a URL to shorten</h2>
+    <main>
+      <h2>Enter a URL to shorten</h2>
 
-    <form action="/urls" method="POST">
-      <input id="longURL" type="text" name="longURL" placeholder="http://">
-      <input type="submit" value="Submit">
-    </form>
+      <form action="/urls" method="POST">
+        <input id="longURL" type="text" name="longURL" placeholder="http://">
+        <input type="submit" value="Submit">
+      </form>
+    </main>
 
     <footer>
       <% include ./partials/_footer %>
     </footer>
-
   </body>
 </html>

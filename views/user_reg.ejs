@@ -1,29 +1,29 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <% include ./partials/_head %>
-</head>
-<body>
+  <head>
+    <% include ./partials/_head %>
+  </head>
+  <body>
 
-  <header>
-    <% include ./partials/_header %>
-  </header>
+    <header>
+      <% include ./partials/_header %>
+    </header>
 
-  <main>
-    <h2>Create a new account</h2>
+    <main>
+      <h2>Create a new account</h2>
 
-    <form action="/register" method="POST">
-      <label for="email">Email </label>
-      <input id="email" type="email" name="email" placeholder="E-mail"><br/>
-      <label for="password">Password </label>
-      <input id="password" type="password" name="password" placeholder="Password"><br/>
-      <input type="submit" value="Register">
-    </form>
-  </main>
+      <form action="/register" method="POST">
+        <label for="email">Email </label>
+        <input id="email" type="email" name="email" placeholder="E-mail"><br/>
+        <label for="password">Password </label>
+        <input id="password" type="password" name="password" placeholder="Password"><br/>
+        <input type="submit" value="Register">
+      </form>
+    </main>
 
-  <footer>
-    <% include ./partials/_footer %>
-  </footer>
+    <footer>
+      <% include ./partials/_footer %>
+    </footer>
 
-</body>
+  </body>
 </html>

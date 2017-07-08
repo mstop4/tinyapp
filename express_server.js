@@ -1,13 +1,24 @@
+/*-----------------*
+ *                 *
+ *     TinyApp     *
+ *                 *
+ *  URL Shortener  *
+ *                 *
+ *-----------------*/
+
+// --------
 // Requires
 // --------
 
 require("dotenv").config();
-var express = require("express");
+const express = require("express");
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
 const bcrypt = require("bcrypt");
 const methodOverride = require('method-override');
 
+
+// --------
 // Init app
 // --------
 
@@ -22,8 +33,10 @@ app.use(cookieSession({
 app.use(methodOverride('_method'))
 app.set("view engine", "ejs");
 
-var PORT = process.env.MY_PORT || 8080;
+let PORT = process.env.MY_PORT || 8080;
 
+
+// ---------
 // Databases
 // ---------
 
@@ -33,15 +46,17 @@ var PORT = process.env.MY_PORT || 8080;
 //                dateCreated: Date,
 //                hits: Number}
 
-var urlDatabase = {};
+let urlDatabase = {};
 
 // User entry format:
 // <userId> : { id: String,
 //              email: String,
 //              pasHash: String}
 
-var users = {};
+let users = {};
 
+
+// ----------------
 // Helper Functions
 // ----------------
 
@@ -69,7 +84,7 @@ function generateRandomString(length) {
   const legalCharacters = "0123456789ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   let output = "";
 
-  for (var i = 0; i < length; i++) {
+  for (let i = 0; i < length; i++) {
     output += legalCharacters[Math.floor(Math.random() * legalCharacters.length)]
   }
 
@@ -100,31 +115,29 @@ function protocolFixer (url) {
   }
 }
 
-// Sends a response to render a page (with HTTP 200) with default and optional template variables
+// Sends a response to render a page (with HTTP 200) with default and optional template letiables
 function sendRenderResponse (req, res, page, addParams) {
-    let templateVars = { user: req.session.user };
+    let templatelets = { user: req.session.user };
 
     for (param in addParams) {
-      templateVars[param] = addParams[param];
+      templatelets[param] = addParams[param];
     }
 
-    return res.status(200).render(page, templateVars);
+    return res.status(200).render(page, templatelets);
 }
 
-// Sends error responses (i.e. HTTP 401, 403, 404) with default template variables
+// Sends error responses (i.e. HTTP 401, 403, 404) with default template letiables
 function sendErrorResponse (errorCode, req, res, page) {
-  let templateVars = { user: req.session.user };
-  return res.status(errorCode).render(page, templateVars);
+  let templatelets = { user: req.session.user };
+  return res.status(errorCode).render(page, templatelets);
 }
 
-// Server Functions
-// ----------------
 
 // GET root - logged in = redirect to login page
 //          - logged out = redirect to user's shortlink list
 app.get("/", (req, res) => {
 
-  let templateVars = { user: req.session.user };
+  let templatelets = { user: req.session.user };
 
   if (!amILoggedIn(req)) {
     return res.redirect(302, "/login");
@@ -133,8 +146,11 @@ app.get("/", (req, res) => {
   res.redirect(302, "/urls");
 });
 
+
+// -----------------------------------
 // User Database CRUD & Authentication
 // -----------------------------------
+
 
 // POST /login - log into the service
 app.post("/login", (req, res) => {
@@ -158,7 +174,6 @@ app.post("/login", (req, res) => {
 
   if (bcrypt.compareSync(password, curentUser["passHash"])) {
     req.session.user = curentUser;
-    console.log("User logged in as:" + curentUser["id"] + " - " + curentUser["email"]);
     return res.redirect(302, "/");
   } else {
     sendRenderResponse(req, res, "error_invalidCredentials");
@@ -215,7 +230,6 @@ app.post("/register", (req, res) => {
   addUser(randomID, req.body.email, hash);
   req.session.user = users[randomID];
 
-  console.log("Logged in as:" + randomID + " - " + req.body.email);
   res.redirect(302, "/urls");
 });
 
@@ -231,6 +245,8 @@ app.get("/register", (req, res) => {
   sendRenderResponse(req, res, "user_reg");
 });
 
+
+// ---------------------
 // Shortlink Redirection
 // ---------------------
 
@@ -245,10 +261,12 @@ app.get("/u/:id", (req, res) => {
   }
 
   urlDatabase[shortCode]["hits"]++;
-  let longURL = urlDatabase[req.params.shortCode]["url"];
+  let longURL = urlDatabase[shortCode]["url"];
   res.redirect(302, longURL);
 });
 
+
+// -----------------
 // URL Database CRUD
 // -----------------
 
@@ -277,7 +295,6 @@ app.post("/urls", (req, res) => {
   let shortCode = generateRandomString(6);
 
   addURL(shortCode, longURL, req.session.user["id"]);
-  console.log(longURL, " --> ", shortCode);
   res.redirect(302, "/urls/" + shortCode);
 
 });
@@ -316,7 +333,6 @@ app.delete("/urls/:id", (req, res) => {
     return sendErrorResponse(403, req, res, "error_403");
   }
 
-  console.log("Delete", req.params.id);
   delete urlDatabase[req.params.id];
   res.redirect(302, "/urls");
 });
@@ -375,12 +391,11 @@ app.get("/urls/:id", (req, res) => {
 
 // GET /teapot - easter egg
 app.get("/teapot", (req, res) => {
-    let templateVars = { user: req.session.user };
-    console.log("Someone found the easter egg!");
-    res.status(418).render("im_a_teapot", templateVars);
+    let templatelets = { user: req.session.user };
+    res.status(418).render("im_a_teapot", templatelets);
 });
 
-
+// ----------
 // Start Here
 // ----------
 
@@ -394,7 +409,7 @@ addUser("eeeeee", "normal@guy.org", "boring");
 addURL("b2xVn2", "http://www.lighthouselabs.ca", "eeeeee");
 addURL("9sm5xK", "http://www.google.com", "eeeeee");
 addURL("teapot", "http://www.google.com/teapot", "eeeeee");
-addURL("lugage", "http://www.luggage.com", "bbbbbb");
+addURL("lugage", "http://sbws.tripod.com/space.htm", "bbbbbb");
 addURL("9sm5xK", "http://www.benderisgreat.com", "dddddd");
 
 // Start server

@@ -1,7 +1,7 @@
 <!-- view/parials/header.ejs -->
 
 <nav>
-  <h1>TinyApp</h1>
+  <h1 class="headerback">TinyApp</h1>
   <ul>
     <li class="navbar"><a href="/urls/new" class="navbar">Create Shortlink</a></li>
     <li class="navbar"><a href="/urls" class="navbar">Your Shortlinks</a></li>
@@ -12,10 +12,11 @@
 
     <!-- Is logged in -->
     <% if (user) { %>
-      <p>Welcome back, <%= user["email"] %>!</p>
+      <p>Welcome back, <span class="userEmail"><%= user["email"] %></span>!
       <form action="/logout" method="POST">
         <input type="submit" value="Sign Out">
       </form>
+      </p>
 
     <!-- Is not logged in -->
     <% } else { %>
