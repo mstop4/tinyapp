@@ -137,8 +137,6 @@ function sendErrorResponse (errorCode, req, res, page) {
 //          - logged out = redirect to user's shortlink list
 app.get("/", (req, res) => {
 
-  let templateVars = { user: req.session.user };
-
   if (!amILoggedIn(req)) {
     return res.redirect(302, "/login");
   }
