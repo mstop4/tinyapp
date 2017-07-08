@@ -115,21 +115,21 @@ function protocolFixer (url) {
   }
 }
 
-// Sends a response to render a page (with HTTP 200) with default and optional template letiables
+// Sends a response to render a page (with HTTP 200) with default and optional template variables
 function sendRenderResponse (req, res, page, addParams) {
-    let templatelets = { user: req.session.user };
+    let templateVars = { user: req.session.user };
 
     for (param in addParams) {
-      templatelets[param] = addParams[param];
+      templateVars[param] = addParams[param];
     }
 
-    return res.status(200).render(page, templatelets);
+    return res.status(200).render(page, templateVars);
 }
 
-// Sends error responses (i.e. HTTP 401, 403, 404) with default template letiables
+// Sends error responses (i.e. HTTP 401, 403, 404) with default template variables
 function sendErrorResponse (errorCode, req, res, page) {
-  let templatelets = { user: req.session.user };
-  return res.status(errorCode).render(page, templatelets);
+  let templateVars = { user: req.session.user };
+  return res.status(errorCode).render(page, templateVars);
 }
 
 
@@ -137,7 +137,7 @@ function sendErrorResponse (errorCode, req, res, page) {
 //          - logged out = redirect to user's shortlink list
 app.get("/", (req, res) => {
 
-  let templatelets = { user: req.session.user };
+  let templateVars = { user: req.session.user };
 
   if (!amILoggedIn(req)) {
     return res.redirect(302, "/login");
@@ -391,8 +391,8 @@ app.get("/urls/:id", (req, res) => {
 
 // GET /teapot - easter egg
 app.get("/teapot", (req, res) => {
-    let templatelets = { user: req.session.user };
-    res.status(418).render("im_a_teapot", templatelets);
+    let templateVars = { user: req.session.user };
+    res.status(418).render("im_a_teapot", templateVars);
 });
 
 // ----------
